@@ -1,0 +1,9 @@
+build
+composer.lock
+vendor
+phpcs.xml
+phpunit.xml
+.php_cs.cache
+data/*
+cache/*
+!data/.gitkeep

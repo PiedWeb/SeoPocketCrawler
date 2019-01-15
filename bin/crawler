@@ -1,0 +1,114 @@
+#!/usr/bin/env php
+<?php
+
+include 'vendor/autoload.php';
+
+// ---------------
+// Configure
+// ---------------
+$config = [
+    'start' => [
+        'alias' => 's',
+        'help' => 'Define where the crawl start.',
+    ],
+    'limit' => [
+        'alias' => 'l',
+        'default' => 5,
+        'help' => 'Define where a depth limit for the crawler (default 5).',
+        'filter' => 'int',
+    ],
+    'ignore' => [
+        'alias' => 'i',
+        'default' => null,
+        'help' => 'Virtual Robots.txt wich will be interpreted for this crawl (could be a string or an URL).',
+    ],
+    'user-agent' => [
+        'alias' => 'u',
+        'default' => 'PockectCr. From PiedWeb',
+        'help' => 'Define the user-agent used during the crawl',
+    ],
+    'verbose' => [
+        'alias' => 'v',
+        'default' => 1,
+        'help' => 'Display debugging information (0/1, default 1).',
+        'filter' => 'int',
+    ],
+    'wait' => [
+        'alias' => 'w',
+        'default' => 100000,
+        'help' => 'In Microseconds, the time to wait between two request. Default : 100000 (0,1s).',
+        'filter' => 'int',
+    ],
+    'cache-method' => [
+        'alias' => 'c',
+        'default' => \PiedWeb\SeoPocketCrawler\Recorder::CACHE_ID,
+        'help' => 'Keep a copy for each html crawled page : '
+                  .\PiedWeb\SeoPocketCrawler\Recorder::CACHE_NONE.' (no),'
+                  .\PiedWeb\SeoPocketCrawler\Recorder::CACHE_ID.' (with filename corresponding to the ID),'
+                  .\PiedWeb\SeoPocketCrawler\Recorder::CACHE_URI.' (with filename corresponding to the Uri).',
+        'filter' => 'int',
+    ],
+
+];
+
+$CliArgs = new CliArgs\CliArgs($config);
+if ($CliArgs->isFlagExists('help', 'h')) {
+    echo $CliArgs->getHelp('help');
+    die();
+}
+
+$startUrl = $CliArgs->getArg('start');
+$limit    = intval($CliArgs->getArg('limit'));
+
+$ignore   = $CliArgs->getArg('ignore') ?? '';
+if (filter_var($ignore, FILTER_VALIDATE_URL)) $ignore = \PiedWeb\Curl\Request::get($ignore);
+if (file_exists($ignore)) $ignore = file_get_contents($ignore);
+
+$userAgent = (string) $CliArgs->getArg('user-agent');
+$debug     = $CliArgs->getArg('verbose');
+
+$wait = intval($CliArgs->getArg('wait'));
+
+$cacheMethod = intval($CliArgs->getArg('cache-method'));
+
+// ---------------
+// Crawler working
+// ---------------
+if ($startUrl === null) {
+    throw new \Exception('--start is required');
+}
+
+if ($debug) {
+    echo PHP_EOL.PHP_EOL.PHP_EOL;
+    echo '    Crawl starting'.PHP_EOL;
+    echo '    '.$startUrl.PHP_EOL;
+    echo '    '.$userAgent.PHP_EOL;
+    echo '    '.$wait.' ms between two requests'.PHP_EOL;
+    echo PHP_EOL.PHP_EOL.PHP_EOL.PHP_EOL;
+}
+
+$start = microtime(true);
+
+$crawl = new \PiedWeb\SeoPocketCrawler\Crawler($startUrl, $ignore, $limit, $userAgent, $cacheMethod);
+$crawl->setWaitBetweenRequest($wait);
+$crawl->crawl($debug);
+
+$end = microtime(true);
+
+if ($debug) {
+    echo PHP_EOL.PHP_EOL.'---------------'.PHP_EOL;
+    echo PHP_EOL.'Crawl succeed'.PHP_EOL;
+    echo 'You can find your data in '.PHP_EOL;
+}
+
+echo realpath($crawl->getDataFolder()).'/index.csv'.PHP_EOL;
+
+
+if ($debug) {
+    echo PHP_EOL.PHP_EOL;
+    echo "----Chrono----\n";
+    echo (round(($end - $start) , 2)).'s'.PHP_EOL.PHP_EOL;
+}
+
+
+
