@@ -6,4 +6,5 @@ phpunit.xml
 .php_cs.cache
 data/*
 cache/*
+cache/
 !data/.gitkeep

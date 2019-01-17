@@ -29,11 +29,6 @@ class Recorder
         }
     }
 
-    public function getFolder()
-    {
-        return $this->folder;
-    }
-
     public function cache(Harvest $harvest, Url $url)
     {
         if (Recorder::CACHE_NONE === $this->cacheMethod || !$this->mustWeCache($harvest)) {
@@ -53,14 +48,14 @@ class Recorder
     protected function cacheWithIdAsFilename(Harvest $harvest, Url $url)
     {
         return file_put_contents(
-            $this->folder.Recorder::CACHE_DIR.'/'.$url->id,
+            $this->folder.Recorder::CACHE_DIR.'/'.(string) $url->id,
             $harvest->getResponse()->getHeaders(false).PHP_EOL.PHP_EOL.$harvest->getResponse()->getContent()
         );
     }
 
     protected function cacheWithUrlAsFilename(Harvest $harvest, Url $url)
     {
-        $url = trim($harvest->getAbsoluteInternalLink($harvest->getResponse()->getEffectiveUrl()), '/').'/';
+        $url = trim($url->uri, '/').'/';
         $urlPart = explode('/', $url);
         $folder = $this->folder.Recorder::CACHE_DIR;
 
@@ -104,7 +99,7 @@ class Recorder
 
     public function recordInboundLink(Url $from, Url $to)
     {
-        file_put_contents($this->folder.Recorder::LINKS_DIR.'/To_'.$to->id, $from->uri, FILE_APPEND);
+        file_put_contents($this->folder.Recorder::LINKS_DIR.'/To_'.(string) $to->id, $from->uri, FILE_APPEND);
     }
 
     public function recordOutboundLink(Url $from, array $links)
@@ -112,6 +107,6 @@ class Recorder
         $links = array_map(function ($link) {
             return $link->getUrl();
         }, $links);
-        file_put_contents($this->folder.Recorder::LINKS_DIR.'/From_'.$from->id, implode(PHP_EOL, $links));
+        file_put_contents($this->folder.Recorder::LINKS_DIR.'/From_'.(string) $from->id, implode(PHP_EOL, $links));
     }
 }

@@ -149,8 +149,6 @@ class Crawler
         } else {
             $this->recorder->cache($harvest, $url);
 
-            $this->content_type = $harvest->getResponse()->getContentType();
-
             $mimeType = $harvest->getResponse()->getMimeType();
             $url->mime_type = 'text/html' == $mimeType ? 1 : $mimeType;
 
