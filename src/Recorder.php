@@ -99,7 +99,7 @@ class Recorder
 
     public function recordInboundLink(Url $from, Url $to)
     {
-        file_put_contents($this->folder.Recorder::LINKS_DIR.'/To_'.(string) $to->id, $from->uri, FILE_APPEND);
+        file_put_contents($this->folder.Recorder::LINKS_DIR.'/To_'.(string) $to->id, $from->uri.PHP_EOL, FILE_APPEND);
     }
 
     public function recordOutboundLink(Url $from, array $links)
