@@ -15,6 +15,9 @@ Web Crawler to check few SEO basics.
 
 Use the collected data in your favorite spreadsheet software.
 
+French documentation available :
+https://piedweb.com/seo/crawler
+
 ## Install
 
 Via [Packagist](https://img.shields.io/packagist/dt/piedweb/seo-pocket-crawler.svg?style=flat)
@@ -38,7 +41,8 @@ Other args:
         Define where a depth limit for the crawler (default 5).
 
     --ignore -i
-        Virtual Robots.txt wich will be interpreted for this crawl (could be a string or an URL).
+        Virtual Robots.txt wich will be interpreted for this crawl (could be a
+        string or an URL).
 
     --user-agent -u
         Define the user-agent used during the crawl
@@ -47,7 +51,12 @@ Other args:
         Display debugging information (0/1, default 1).
 
     --wait -w
-        In Microseconds, the time to wait between two request. Default : 100000 (0,1s).
+        In Microseconds, the time to wait between two request. Default : 100000
+        (0,1s).
+
+    --cache-method -c
+        Keep a copy for each html crawled page : 0 (no),2 (with filename
+        corresponding to the ID),1 (with filename corresponding to the Uri).
 
 ```
 
