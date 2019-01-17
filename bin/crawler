@@ -24,7 +24,7 @@ $config = [
     ],
     'user-agent' => [
         'alias' => 'u',
-        'default' => 'PockectCr. From PiedWeb',
+        'default' => 'SEO Pocket Crawler',
         'help' => 'Define the user-agent used during the crawl',
     ],
     'verbose' => [

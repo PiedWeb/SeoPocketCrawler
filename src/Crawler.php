@@ -64,7 +64,7 @@ class Crawler
             }
 
             if ($debug) {
-                echo '    '.$urlToParse.PHP_EOL;
+                echo $this->counter.'/'.count($this->urls).'    '.$urlToParse.PHP_EOL;
             }
 
             $nothingUpdated = false;
@@ -174,8 +174,9 @@ class Crawler
             }
 
             $url->title = $harvest->getUniqueTag('head title') ?? '';
-            $url->kws = ','.implode(',', $harvest->getKws()).',';
+            $url->kws = ','.implode(',', array_keys($harvest->getKws())).',';
             $url->h1 = $harvest->getUniqueTag('h1') ?? '';
+            $url->h1 = $url->title == $url->h1 ? '=' : $url->h1;
         }
 
         if (isset($links)) {
