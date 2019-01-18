@@ -80,7 +80,7 @@ class Crawler
             usleep($this->wait);
 
             if ($this->counter / 500 == round($this->counter / 500)) {
-                echo $debug ? '    --- aut-save'.PHP_EOL : '';
+                echo $debug ? '    --- auto-save'.PHP_EOL : '';
                 $this->recorder->record($this->urls);
             }
         }
@@ -188,12 +188,16 @@ class Crawler
             $url->h1 = $url->title == $url->h1 ? '=' : $url->h1;
         }
 
+        $everAdd = [];
         if (isset($links)) {
             foreach ($links as $link) {
                 $linkUrl = $link->getPageUrl();
                 $this->urls[$linkUrl] = $this->urls[$linkUrl] ?? new Url($linkUrl, ($this->currentClick + 1));
                 $this->recorder->recordInboundLink($url, $this->urls[$linkUrl]);
-                ++$this->urls[$linkUrl]->inboundlinks;
+                if (!isset($everAdd[$linkUrl])) {
+                    $everAdd[$linkUrl] = 1;
+                    ++$this->urls[$linkUrl]->inboundlinks;
+                }
             }
         }
 
