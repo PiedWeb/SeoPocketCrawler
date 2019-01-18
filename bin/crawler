@@ -56,9 +56,9 @@ $config = [
     ],
     'restart' => [
         'alias' => 'r',
-        'default' => false,
-        'help' => '[FLAG] Permit to restart a previous crawl.',
-        'filter' => 'flag',
+        'default' => 0,
+        'help' => 'Permit to restart a previous crawl. Values 1 = fresh restart, 2 = restart from cache',
+        'filter' => ['1', '2'],
     ],
 
 ];
@@ -100,7 +100,7 @@ use \PiedWeb\SeoPocketCrawler\CrawlerRestart;
 $start = microtime(true);
 
 if ($id !== null) {
-    $crawl = $restart ? new CrawlerRestart($id) : new CrawlerContinue($id);
+    $crawl = $restart ? new CrawlerRestart($id, $restart == 2 ? true : false) : new CrawlerContinue($id);
 } else {
     $crawl = new Crawler($startUrl, $ignore, $limit, $userAgent, $cacheMethod, $wait);
 }

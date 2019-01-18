@@ -117,7 +117,7 @@ class Crawler
             }
 
             if ($debug) {
-                echo $this->counter.'/'.count($this->urls).'    '.$urlToParse.PHP_EOL;
+                echo $this->counter.'/'.count($this->urls).'    '.$this->base.$urlToParse.PHP_EOL;
             }
 
             $nothingUpdated = false;
@@ -159,7 +159,7 @@ class Crawler
 
     protected function cacheRequest($harvest)
     {
-        if ($harvest instanceof Harvest) {
+        if ($harvest instanceof Harvest && null !== $harvest->getResponse()->getRequest()) {
             $this->request = $harvest->getResponse()->getRequest();
         }
 
@@ -175,6 +175,16 @@ class Crawler
         return $this;
     }
 
+    protected function getHarvest(Url $url)
+    {
+        return Harvest::fromUrl(
+            $this->base.$url->uri,
+            $this->userAgent,
+            'en,en-US;q=0.5',
+            $this->request
+        );
+    }
+
     protected function harvest(string $urlToParse)
     {
         $this->urls[$urlToParse] = $this->urls[$urlToParse] ?? new Url($this->base.$urlToParse, $this->currentClick);
@@ -186,12 +196,7 @@ class Crawler
             return;
         }
 
-        $harvest = Harvest::fromUrl(
-            $this->base.$urlToParse,
-            $this->userAgent,
-            'en,en-US;q=0.5',
-            $this->request
-        );
+        $harvest = $this->getHarvest($url);
 
         if (!$harvest instanceof Harvest) {
             $url->indexable = Indexable::NOT_INDEXABLE_NETWORK_ERROR;
@@ -244,12 +249,12 @@ class Crawler
         $everAdd = [];
         if (isset($links)) {
             foreach ($links as $link) {
-                $linkUrl = $link->getPageUrl();
-                $this->urls[$linkUrl] = $this->urls[$linkUrl] ?? new Url($linkUrl, ($this->currentClick + 1));
-                if (!isset($everAdd[$linkUrl])) {
-                    $everAdd[$linkUrl] = 1;
-                    $this->recorder->recordInboundLink($url, $this->urls[$linkUrl]);
-                    ++$this->urls[$linkUrl]->inboundlinks;
+                $newUri = substr($link->getPageUrl(), strlen($this->base));
+                $this->urls[$newUri] = $this->urls[$newUri] ?? new Url($link->getPageUrl(), ($this->currentClick + 1));
+                if (!isset($everAdd[$newUri])) {
+                    $everAdd[$newUri] = 1;
+                    $this->recorder->recordInboundLink($url, $this->urls[$newUri]);
+                    ++$this->urls[$newUri]->inboundlinks;
                 }
             }
         }

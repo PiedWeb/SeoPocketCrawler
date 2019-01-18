@@ -32,6 +32,9 @@ class CrawlerTest extends \PHPUnit\Framework\TestCase
         $continue = new CrawlerContinue($crawl->getId());
         $continue->crawl(true);
 
+        $restart = new CrawlerRestart($crawl->getId(), true);
+        $restart->crawl(false);
+
         $this->assertTrue(file_exists($crawl->getDataFolder().'/index.csv'));
     }
 }

@@ -51,7 +51,7 @@ class CrawlerContinue extends Crawler
             }
         }
 
-        $this->currentClick = $r['click'];
+        $this->currentClick = $r['click'] ?? 0;
 
         return $startUrl;
     }

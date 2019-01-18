@@ -33,27 +33,29 @@ class Recorder
     {
         if (Recorder::CACHE_NONE === $this->cacheMethod || !$this->mustWeCache($harvest)) {
             return;
-        } elseif (Recorder::CACHE_URI === $this->cacheMethod) {
-            return $this->cacheWithUrlAsFilename($harvest, $url);
-        } else {
-            return $this->cacheWithIdAsFilename($harvest, $url);
+        }
+
+        $filePath = $this->getCacheFilePath($url);
+        if (!file_exists($filePath)) {
+            file_put_contents(
+                $filePath,
+                $harvest->getResponse()->getHeaders(false).PHP_EOL.PHP_EOL.$harvest->getResponse()->getContent()
+            );
+
+            return file_put_contents($filePath.'---info', json_encode($harvest->getResponse()->getInfo()));
         }
     }
 
-    protected function mustWeCache(Harvest $harvest)
+    public function getCacheFilePath(Url $url)
     {
-        return false !== strpos($harvest->getResponse()->getContentType(), 'text/html');
+        if (Recorder::CACHE_URI === $this->cacheMethod) {
+            return $this->getCacheFilePathWithUrlAsFilename($url);
+        } else {
+            return $this->getCacheFilePathWithIdAsFilename($url);
+        }
     }
 
-    protected function cacheWithIdAsFilename(Harvest $harvest, Url $url)
-    {
-        return file_put_contents(
-            $this->folder.Recorder::CACHE_DIR.'/'.(string) $url->id,
-            $harvest->getResponse()->getHeaders(false).PHP_EOL.PHP_EOL.$harvest->getResponse()->getContent()
-        );
-    }
-
-    protected function cacheWithUrlAsFilename(Harvest $harvest, Url $url)
+    protected function getCacheFilePathWithUrlAsFilename(Url $url)
     {
         $url = trim($url->uri, '/').'/';
         $urlPart = explode('/', $url);
@@ -62,12 +64,7 @@ class Recorder
         $urlPartLenght = count($urlPart);
         for ($i = 0; $i < $urlPartLenght; ++$i) {
             if ($i == $urlPartLenght - 1) {
-                $filename = empty($urlPart[$i]) ? 'index.html' : $urlPart[$i];
-
-                return file_put_contents(
-                    $folder.'/'.$filename,
-                    $harvest->getResponse()->getHeaders(false).PHP_EOL.PHP_EOL.$harvest->getResponse()->getContent()
-                );
+                return $folder.'/'.(empty($urlPart[$i]) ? 'index.html' : $urlPart[$i]);
             } else {
                 $folder .= '/'.$urlPart[$i];
                 if (!file_exists($folder) || !is_dir($folder)) {
@@ -75,6 +72,16 @@ class Recorder
                 }
             }
         }
+    }
+
+    protected function getCacheFilePathWithIdAsFilename(Url $url)
+    {
+        return $this->folder.Recorder::CACHE_DIR.'/'.(string) $url->id;
+    }
+
+    protected function mustWeCache(Harvest $harvest)
+    {
+        return false !== strpos($harvest->getResponse()->getContentType(), 'text/html');
     }
 
     public function record(array $urls)
