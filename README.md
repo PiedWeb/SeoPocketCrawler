@@ -58,6 +58,14 @@ Other args:
         Keep a copy for each html crawled page : 0 (no),2 (with filename
         corresponding to the ID),1 (with filename corresponding to the Uri).
 
+    --id -i
+        Permit to continue or if parameter --restart is set, restart a previous
+        crawl. Other args will not be listen.
+
+    --restart -r
+        [FLAG] Permit to restart a previous crawl.
+
+
 ```
 
 ## Testing

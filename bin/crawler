@@ -48,6 +48,18 @@ $config = [
                   .\PiedWeb\SeoPocketCrawler\Recorder::CACHE_URI.' (with filename corresponding to the Uri).',
         'filter' => 'int',
     ],
+    'id' => [
+        'alias' => 'i',
+        'default' => null,
+        'help' => 'Permit to continue or if parameter --restart is set, restart a previous crawl.'
+                 .' Other args will not be listen.',
+    ],
+    'restart' => [
+        'alias' => 'r',
+        'default' => false,
+        'help' => '[FLAG] Permit to restart a previous crawl.',
+        'filter' => 'flag',
+    ],
 
 ];
 
@@ -71,26 +83,44 @@ $wait = intval($CliArgs->getArg('wait'));
 
 $cacheMethod = intval($CliArgs->getArg('cache-method'));
 
+$id = $CliArgs->getArg('id');
+$restart = $CliArgs->getArg('restart');
+
 // ---------------
 // Crawler working
 // ---------------
-if ($startUrl === null) {
-    throw new \Exception('--start is required');
+if ($startUrl === null && $id === null) {
+    throw new \Exception('--start or --id is required');
+}
+
+use \PiedWeb\SeoPocketCrawler\Crawler;
+use \PiedWeb\SeoPocketCrawler\CrawlerContinue;
+use \PiedWeb\SeoPocketCrawler\CrawlerRestart;
+
+$start = microtime(true);
+
+if ($id !== null) {
+    $crawl = $restart ? new CrawlerRestart($id) : new CrawlerContinue($id);
+} else {
+    $crawl = new Crawler($startUrl, $ignore, $limit, $userAgent, $cacheMethod, $wait);
 }
 
 if ($debug) {
     echo PHP_EOL.PHP_EOL.PHP_EOL;
-    echo '    Crawl starting'.PHP_EOL;
-    echo '    '.$startUrl.PHP_EOL;
-    echo '    '.$userAgent.PHP_EOL;
-    echo '    '.$wait.' ms between two requests'.PHP_EOL;
+    echo '    Crawl `'.$crawl->getId().'` starting'.PHP_EOL;
+    if ($id === null) {
+        echo '    '.$startUrl.PHP_EOL;
+        echo '    '.$userAgent.PHP_EOL;
+        echo '    '.$wait.' ms between two requests'.PHP_EOL;
+    } else {
+        echo '    '.($restart ? 'Restart' : 'Continue').PHP_EOL;
+    }
     echo PHP_EOL.PHP_EOL.PHP_EOL.PHP_EOL;
+} else {
+    echo $crawl->getId().PHP_EOL;
 }
 
-$start = microtime(true);
 
-$crawl = new \PiedWeb\SeoPocketCrawler\Crawler($startUrl, $ignore, $limit, $userAgent, $cacheMethod);
-$crawl->setWaitBetweenRequest($wait);
 $crawl->crawl($debug);
 
 $end = microtime(true);

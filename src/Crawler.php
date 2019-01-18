@@ -8,10 +8,36 @@ use Spatie\Robots\RobotsTxt;
 
 class Crawler
 {
+    /**
+     * @var string contain the user agent used during the crawl
+     */
     protected $userAgent;
-    protected $project;
+
+    /**
+     * @var string crawl id
+     */
+    protected $id;
+
+    /**
+     * @var RobotsTxt page to ignore during the crawl
+     */
     protected $ignore;
+
+    /**
+     * @var int depth max where to crawl
+     */
     protected $limit;
+
+    /**
+     * @var string contain https://domain.tdl from start url
+     */
+    protected $base;
+
+    /**
+     * @var bool
+     */
+    protected $fromCache;
+
     protected $recorder;
     protected $robotsTxt;
     protected $request;
@@ -28,25 +54,50 @@ class Crawler
         string $ignore,
         int $limit,
         string $userAgent,
-        int $cacheMethod = Recorder::CACHE_ID
+        int $cacheMethod = Recorder::CACHE_ID,
+        int $waitInMicroSeconds = 100000
     ) {
+        $startUrl = $this->setBaseAndReturnNormalizedStartUrl($startUrl);
         $this->urls[$startUrl] = null;
-        $this->project = preg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $startUrl).'-'.date('ymd-Hi');
+        $this->id = date('ymdHi').'-'.parse_url($this->base, PHP_URL_HOST);
         $this->ignore = new RobotsTxt($ignore);
         $this->userAgent = $userAgent;
         $this->limit = $limit;
+        $this->wait = $waitInMicroSeconds;
 
         $this->recorder = new Recorder($this->getDataFolder(), $cacheMethod);
+
+        file_put_contents($this->getDataFolder().'/config.json', json_encode([
+            'startUrl' => $startUrl,
+            'base' => $this->base,
+            'ignore' => $ignore,
+            'limit' => $limit,
+            'userAgent' => $userAgent,
+            'cacheMethod' => $cacheMethod,
+            'wait' => $waitInMicroSeconds,
+        ]));
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    protected function setBaseAndReturnNormalizedStartUrl(string $url): string
+    {
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            throw new \Exception('start is not a valid URL `'.$url.'`');
+        }
+
+        $this->base = preg_match('@^(http://|https://)?[^/\?#]+@', $url, $match) ? $match[0] : $url;
+        $url = substr($url, strlen($this->base));
+
+        return ('/' != $url[0] ? '/' : '').$url;
     }
 
     public function getDataFolder()
     {
-        return __DIR__.'/../data/'.$this->project;
-    }
-
-    public function setWaitBetweenRequest(int $microSeconds = 100000)
-    {
-        $this->wait = $microSeconds;
+        return __DIR__.'/../data/'.$this->id;
     }
 
     public function crawl(bool $debug = false)
@@ -60,6 +111,8 @@ class Crawler
 
         foreach ($this->urls as $urlToParse => $url) {
             if (null !== $url && (false === $url->can_be_crawled || true === $url->can_be_crawled)) { // déjà crawlé
+                continue;
+            } elseif ($this->currentClick > $this->limit) {
                 continue;
             }
 
@@ -124,17 +177,17 @@ class Crawler
 
     protected function harvest(string $urlToParse)
     {
-        $url = $this->urls[$urlToParse] = $this->urls[$urlToParse] ?? new Url($urlToParse, $this->currentClick);
+        $this->urls[$urlToParse] = $this->urls[$urlToParse] ?? new Url($this->base.$urlToParse, $this->currentClick);
+        $url = $this->urls[$urlToParse];
 
-        $url->updated_at = date('Ymd');
-        $url->can_be_crawled = $this->ignore->allows($urlToParse, $this->userAgent);
+        $url->can_be_crawled = $this->ignore->allows($this->base.$urlToParse, $this->userAgent);
 
         if (false === $url->can_be_crawled) {
             return;
         }
 
         $harvest = Harvest::fromUrl(
-            $urlToParse,
+            $this->base.$urlToParse,
             $this->userAgent,
             'en,en-US;q=0.5',
             $this->request
@@ -193,9 +246,9 @@ class Crawler
             foreach ($links as $link) {
                 $linkUrl = $link->getPageUrl();
                 $this->urls[$linkUrl] = $this->urls[$linkUrl] ?? new Url($linkUrl, ($this->currentClick + 1));
-                $this->recorder->recordInboundLink($url, $this->urls[$linkUrl]);
                 if (!isset($everAdd[$linkUrl])) {
                     $everAdd[$linkUrl] = 1;
+                    $this->recorder->recordInboundLink($url, $this->urls[$linkUrl]);
                     ++$this->urls[$linkUrl]->inboundlinks;
                 }
             }
