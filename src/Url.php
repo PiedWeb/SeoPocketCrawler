@@ -9,6 +9,7 @@ class Url
     private static $autoIncrement = 1;
 
     public $id;
+    public $discovered;
     public $uri;
     public $updated_at;
     public $click;
@@ -49,5 +50,12 @@ class Url
         }
 
         return $this->id;
+    }
+
+    public function setDiscovered(int $discovered)
+    {
+        $this->discovered = $discovered;
+
+        return $this;
     }
 }

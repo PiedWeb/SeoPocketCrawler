@@ -71,19 +71,28 @@ class Crawler
             ++$this->counter;
 
             $harvest = $this->harvest($urlToParse);
+            $this->urls[$urlToParse]->setDiscovered(count($this->urls));
 
             $this->cacheRobotsTxt($harvest);
 
             $this->cacheRequest($harvest);
 
             usleep($this->wait);
+
+            if ($this->counter / 500 == round($this->counter / 500)) {
+                echo $debug ? '    --- aut-save'.PHP_EOL : '';
+                $this->recorder->record($this->urls);
+            }
         }
 
         ++$this->currentClick;
 
+        // Record after each Level:
+        $this->recorder->record($this->urls);
+
         $record = $nothingUpdated || $this->currentClick >= $this->limit;
 
-        return $record ? $this->recorder->record($this->urls) : $this->crawl($debug);
+        return $record ? null : $this->crawl($debug);
     }
 
     protected function cacheRobotsTxt($harvest)
