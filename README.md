@@ -63,7 +63,8 @@ Other args:
         crawl. Other args will not be listen.
 
     --restart -r
-        [FLAG] Permit to restart a previous crawl.
+        Permit to restart a previous crawl. Values 1 = fresh restart, 2 = restart
+        from cache
 
 
 ```
