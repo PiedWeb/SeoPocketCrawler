@@ -21,7 +21,6 @@ class Recorder
         $this->folder = $folder;
         $this->cacheMethod = $cacheMethod;
 
-        //exec('rm -rf '.$folder);
         if (!file_exists($folder)) {
             mkdir($folder);
             mkdir($folder.Recorder::LINKS_DIR);

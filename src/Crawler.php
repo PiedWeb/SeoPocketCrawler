@@ -206,7 +206,7 @@ class Crawler
 
         $this->loadRobotsTxt($harvest);
 
-        $url->indexable = $harvest->isIndexable();
+        $url->indexable = $harvest->isIndexable(); // slow ~30%
 
         if (Indexable::NOT_INDEXABLE_3XX === $url->indexable) {
             $redir = $harvest->getRedirection();
@@ -219,7 +219,7 @@ class Crawler
             $mimeType = $harvest->getResponse()->getMimeType();
             $url->mime_type = 'text/html' == $mimeType ? 1 : $mimeType;
 
-            $this->recorder->recordOutboundLink($url, $harvest->getLinks());
+            $this->recorder->recordOutboundLink($url, $harvest->getLinks()); // ~10%
 
             $url->links = count($harvest->getLinks());
             $url->links_duplicate = $harvest->getNbrDuplicateLinks();
@@ -229,7 +229,7 @@ class Crawler
             $url->links_external = count($harvest->getLinks(Harvest::LINK_EXTERNAL));
             $links = $harvest->getLinks(Harvest::LINK_INTERNAL);
 
-            $url->ratio_text_code = $harvest->getRatioTxtCode();
+            $url->ratio_text_code = $harvest->getRatioTxtCode(); // Slow ~30%
             $url->load_time = $harvest->getResponse()->getInfo('total_time');
             $url->size = $harvest->getResponse()->getInfo('size_download');
 
@@ -241,7 +241,7 @@ class Crawler
             }
 
             $url->title = $harvest->getUniqueTag('head title') ?? '';
-            $url->kws = ','.implode(',', array_keys($harvest->getKws())).',';
+            $url->kws = ','.implode(',', array_keys($harvest->getKws())).','; // Slow ~20%
             $url->h1 = $harvest->getUniqueTag('h1') ?? '';
             $url->h1 = $url->title == $url->h1 ? '=' : $url->h1;
         }

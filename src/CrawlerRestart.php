@@ -12,6 +12,14 @@ class CrawlerRestart extends CrawlerContinue
         $this->fromCache = $fromCache;
 
         parent::__construct($id);
+
+        $this->resetLinks();
+    }
+
+    protected function resetLinks()
+    {
+        exec('rm -rf '.$this->getDataFolder().Recorder::LINKS_DIR);
+        mkdir($this->getDataFolder().Recorder::LINKS_DIR);
     }
 
     protected function loadFromPreviousCrawl(string $startUrl)
@@ -23,7 +31,7 @@ class CrawlerRestart extends CrawlerContinue
     {
         if (true === $this->fromCache) {
             $filePath = $this->recorder->getCacheFilePath($url);
-            if ($filePath !== null && file_exists($filePath)) {
+            if (null !== $filePath && file_exists($filePath)) {
                 $response = new ResponseFromCache(
                     $filePath,
                     $this->base.$url->uri,
