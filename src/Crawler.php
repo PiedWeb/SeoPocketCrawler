@@ -229,7 +229,8 @@ class Crawler
             $url->links_external = count($harvest->getLinks(Harvest::LINK_EXTERNAL));
             $links = $harvest->getLinks(Harvest::LINK_INTERNAL);
 
-            $url->ratio_text_code = $harvest->getRatioTxtCode(); // Slow ~30%
+            //$url->ratio_text_code = $harvest->getRatioTxtCode(); // Slow ~30%
+            $url->words_count = $harvest->getTextAnalysis()->getWordNumber();
             $url->load_time = $harvest->getResponse()->getInfo('total_time');
             $url->size = $harvest->getResponse()->getInfo('size_download');
 

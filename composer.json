@@ -17,7 +17,7 @@
     ],
     "require": {
         "php" : "~7.1",
-        "piedweb/url-harvester": "^0.0.10",
+        "piedweb/url-harvester": "^0.0.11",
         "cheprasov/php-cli-args": "^2.1",
         "league/csv": "^9.1",
         "piedweb/curl": "^0.0"

@@ -21,7 +21,7 @@ CREATE TABLE mytable(
   ,links_internal   INTEGER  NOT NULL
   ,links_sub        BIT  NOT NULL
   ,links_external   INTEGER  NOT NULL
-  ,ratio_text_code  INTEGER  NOT NULL
+  ,words_count      INTEGER  NOT NULL
   ,load_time        NUMERIC(8,6) NOT NULL
   ,size             INTEGER  NOT NULL
   ,title            VARCHAR(90)
@@ -51,7 +51,7 @@ class Url
     public $links_internal;
     public $links_sub;
     public $links_external;
-    public $ratio_text_code;
+    public $words_count;
     public $load_time;
     public $size;
     public $title;
