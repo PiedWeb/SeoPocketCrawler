@@ -4,10 +4,14 @@ namespace PiedWeb\SeoPocketCrawler;
 
 use PiedWeb\UrlHarvester\Harvest;
 use PiedWeb\UrlHarvester\Indexable;
+use PiedWeb\UrlHarvester\Link;
 use Spatie\Robots\RobotsTxt;
 
 class Crawler
 {
+    const FOLLOW = 1;
+    const NOFOLLOW = 2;
+
     /**
      * @var string contain the user agent used during the crawl
      */
@@ -211,7 +215,7 @@ class Crawler
         if (Indexable::NOT_INDEXABLE_3XX === $url->indexable) {
             $redir = $harvest->getRedirection();
             if (false !== $redir) {
-                $links = Harvest::LINK_INTERNAL === $harvest->getType($redir) ? [$redir] : [];
+                $links = Harvest::LINK_INTERNAL === $harvest->getType($redir) ? [new Link($redir)] : [];
             }
         } else {
             $this->recorder->cache($harvest, $url);
@@ -220,7 +224,6 @@ class Crawler
             $url->mime_type = 'text/html' == $mimeType ? 1 : $mimeType;
 
             $this->recorder->recordOutboundLink($url, $harvest->getLinks()); // ~10%
-
             $url->links = count($harvest->getLinks());
             $url->links_duplicate = $harvest->getNbrDuplicateLinks();
             $url->links_internal = count($harvest->getLinks(Harvest::LINK_INTERNAL));
@@ -247,19 +250,29 @@ class Crawler
             $url->h1 = $url->title == $url->h1 ? '=' : $url->h1;
         }
 
-        $everAdd = [];
         if (isset($links)) {
-            foreach ($links as $link) {
-                $newUri = substr($link->getPageUrl(), strlen($this->base));
-                $this->urls[$newUri] = $this->urls[$newUri] ?? new Url($link->getPageUrl(), ($this->currentClick + 1));
-                if (!isset($everAdd[$newUri])) {
-                    $everAdd[$newUri] = 1;
-                    $this->recorder->recordInboundLink($url, $this->urls[$newUri]);
-                    ++$this->urls[$newUri]->inboundlinks;
-                }
-            }
+            $this->updateInboundLinksCounter($url, $links, $harvest);
         }
 
         return $harvest;
+    }
+
+    public function updateInboundLinksCounter(Url $url, array $links, Harvest $harvest)
+    {
+        $everAdd = [];
+        foreach ($links as $link) {
+            $newUri = substr($link->getPageUrl(), strlen($this->base));
+            $this->urls[$newUri] = $this->urls[$newUri] ?? new Url($link->getPageUrl(), ($this->currentClick + 1));
+            if (!isset($everAdd[$newUri])) {
+                $everAdd[$newUri] = 1;
+                if (!$link->mayFollow() || !$harvest->mayFollow()) {
+                    ++$this->urls[$newUri]->inboundlinks_nofollow;
+                    $this->recorder->recordInboundLink($url, $this->urls[$newUri], self::NOFOLLOW);
+                } else {
+                    ++$this->urls[$newUri]->inboundlinks;
+                    $this->recorder->recordInboundLink($url, $this->urls[$newUri], self::FOLLOW);
+                }
+            }
+        }
     }
 }

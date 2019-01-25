@@ -12,6 +12,7 @@ CREATE TABLE mytable(
   ,updated_at       DATE
   ,click            INTEGER  NOT NULL
   ,inboundlinks     INTEGER  NOT NULL
+  ,inboundlinks_nofollow INTEGER  NOT NULL
   ,can_be_crawled   BIT  NOT NULL
   ,indexable        BIT  NOT NULL
   ,mime_type        VARCHAR(10) NOT NULL
@@ -42,6 +43,7 @@ class Url
     public $updated_at;
     public $click;
     public $inboundlinks;
+    public $inboundlinks_nofollow;
     public $can_be_crawled;
     public $indexable;
     public $mime_type;
