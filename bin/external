@@ -1,0 +1,50 @@
+#!/usr/bin/env php
+<?php
+
+include 'vendor/autoload.php';
+
+// ---------------
+// Configure
+// ---------------
+$config = [
+    'id' => [
+        'alias' => 'id',
+        'default' => null,
+        'help' => 'id from a previous crawl',
+    ],
+    'host' => [
+        'alias' => 'h',
+        'help' => 'flag permitting to get only host',
+        'filter' => 'flag',
+    ]
+
+];
+
+$CliArgs = new CliArgs\CliArgs($config);
+
+if ($CliArgs->isFlagExists('help', 'h')) {
+    echo $CliArgs->getHelp('help');
+    die();
+}
+
+$id = $CliArgs->getArg('id');
+if ($id === null) {
+    die('--id is required'.PHP_EOL);
+}
+
+$links = \PiedWeb\SeoPocketCrawler\ExtractExternalLinks::scan($id);
+arsort($links);
+$ever = [];
+foreach ($links as $link => $count) {
+    if ($CliArgs->getHelp('host')) {
+        $host = parse_url($link, PHP_URL_HOST);
+        if ($host && !isset($ever[$host])) {
+            $ever[$host] = 1;
+            echo $host.PHP_EOL;
+        }
+    } else {
+        echo $link.PHP_EOL;
+    }
+}
+
+

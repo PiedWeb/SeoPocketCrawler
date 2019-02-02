@@ -28,6 +28,8 @@ $ composer create-project piedweb/seo-pocket-crawler
 
 ## Usage
 
+### Crawler CLI
+
 ``` bash
 $ bin/crawler --start="https://piedweb.com"
 ```
@@ -58,7 +60,7 @@ Other args:
         Keep a copy for each html crawled page : 0 (no),2 (with filename
         corresponding to the ID),1 (with filename corresponding to the Uri).
 
-    --id -i
+    --id -id
         Permit to continue or if parameter --restart is set, restart a previous
         crawl. Other args will not be listen.
 
@@ -68,6 +70,22 @@ Other args:
 
 
 ```
+
+### Extract All External Links in 1s from a previous crawl
+
+``` bash
+$ bin/external --id '0232032-piedweb.com' [--host]
+```
+
+```
+    --id
+        id from a previous crawl
+
+    --host -h
+        flag permitting to get only host
+```
+
+
 
 ## Testing
 

@@ -49,7 +49,7 @@ $config = [
         'filter' => 'int',
     ],
     'id' => [
-        'alias' => 'i',
+        'alias' => 'id',
         'default' => null,
         'help' => 'Permit to continue or if parameter --restart is set, restart a previous crawl.'
                  .' Other args will not be listen.',
