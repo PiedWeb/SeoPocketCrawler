@@ -11,10 +11,10 @@ class ExtractExternalLinks
     protected $filterType;
     protected $external = [];
 
-    protected function __construct(string $id)
+    protected function __construct(string $id, ?string $dataDirectoryBasePath = null)
     {
         $this->id = $id;
-        $this->dir = __DIR__.'/../data/'.$id.'/links';
+        $this->dir = rtrim($dataDirectoryBasePath ?? __DIR__.'/../data', '/').'/'.$id.'/links';
 
         if (!file_exists($this->dir.'/../config.json')) {
             throw new \Exception('no crawl results found for id `'.$id.'`');

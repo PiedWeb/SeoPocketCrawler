@@ -65,7 +65,7 @@ class Crawler
         string $userAgent,
         int $cacheMethod = Recorder::CACHE_ID,
         int $waitInMicroSeconds = 100000,
-        string $dataDirectoryBasePath = null
+        ?string $dataDirectoryBasePath = null
     ) {
         $startUrl = $this->setBaseAndReturnNormalizedStartUrl($startUrl);
         $this->urls[$startUrl] = null;
@@ -93,7 +93,7 @@ class Crawler
     /**
      * @param string $dataDirectoryBasePath
      */
-    protected function initDataDirectory(string $dataDirectoryBasePath = null)
+    protected function initDataDirectory(?string $dataDirectoryBasePath = null)
     {
         $this->dataDirectoryBasePath = rtrim($dataDirectoryBasePath ?? __DIR__.'/../data', '/');
     }

@@ -7,7 +7,7 @@ use League\Csv\Reader;
 
 class CrawlerContinue extends Crawler
 {
-    public function __construct(string $id, string $dataDirectoryBasePath = null)
+    public function __construct(string $id, ?string $dataDirectoryBasePath = null)
     {
         $this->id = trim($id);
         $this->initDataDirectory($dataDirectoryBasePath);
