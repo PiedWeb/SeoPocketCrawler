@@ -7,9 +7,10 @@ use League\Csv\Reader;
 
 class CrawlerContinue extends Crawler
 {
-    public function __construct(string $id)
+    public function __construct(string $id, string $dataDirectoryBasePath = null)
     {
         $this->id = trim($id);
+        $this->initDataDirectory($dataDirectoryBasePath);
 
         $configFilePath = $this->getDataFolder().'/config.json';
         if (!file_exists($configFilePath)) {

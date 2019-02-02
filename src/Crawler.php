@@ -42,6 +42,11 @@ class Crawler
      */
     protected $fromCache;
 
+    /**
+     * @var string
+     */
+    protected $dataDirectoryBasePath;
+
     protected $recorder;
     protected $robotsTxt;
     protected $request;
@@ -59,7 +64,8 @@ class Crawler
         int $limit,
         string $userAgent,
         int $cacheMethod = Recorder::CACHE_ID,
-        int $waitInMicroSeconds = 100000
+        int $waitInMicroSeconds = 100000,
+        string $dataDirectoryBasePath = null
     ) {
         $startUrl = $this->setBaseAndReturnNormalizedStartUrl($startUrl);
         $this->urls[$startUrl] = null;
@@ -68,6 +74,8 @@ class Crawler
         $this->userAgent = $userAgent;
         $this->limit = $limit;
         $this->wait = $waitInMicroSeconds;
+
+        $this->initDataDirectory($dataDirectoryBasePath);
 
         $this->recorder = new Recorder($this->getDataFolder(), $cacheMethod);
 
@@ -80,6 +88,14 @@ class Crawler
             'cacheMethod' => $cacheMethod,
             'wait' => $waitInMicroSeconds,
         ]));
+    }
+
+    /**
+     * @param string $dataDirectoryBasePath
+     */
+    protected function initDataDirectory(string $dataDirectoryBasePath = null)
+    {
+        $this->dataDirectoryBasePath = rtrim($dataDirectoryBasePath ?? __DIR__.'/../data', '/');
     }
 
     public function getId()
@@ -101,7 +117,7 @@ class Crawler
 
     public function getDataFolder()
     {
-        return __DIR__.'/../data/'.$this->id;
+        return $this->dataDirectoryBasePath.'/'.$this->id;
     }
 
     public function crawl(bool $debug = false)

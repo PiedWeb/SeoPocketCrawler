@@ -7,11 +7,11 @@ use PiedWeb\Curl\ResponseFromCache;
 
 class CrawlerRestart extends CrawlerContinue
 {
-    public function __construct(string $id, bool $fromCache = false)
+    public function __construct(string $id, bool $fromCache = false, string $dataDirectoryBasePath = null)
     {
         $this->fromCache = $fromCache;
 
-        parent::__construct($id);
+        parent::__construct($id,$dataDirectoryBasePath);
 
         $this->resetLinks();
     }
