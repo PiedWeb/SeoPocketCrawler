@@ -75,11 +75,7 @@ class Crawler
         $this->limit = $limit;
         $this->wait = $waitInMicroSeconds;
 
-        if (null === $dataDirectoryBasePath) {
-            $this->dataDirectoryBasePath = __DIR__.'/../data';
-        } else {
-            $this->dataDirectoryBasePath = rtrim($dataDirectoryBasePath, '/');
-        }
+        $this->initDataDirectory($dataDirectoryBasePath);
 
         $this->recorder = new Recorder($this->getDataFolder(), $cacheMethod);
 
@@ -92,6 +88,14 @@ class Crawler
             'cacheMethod' => $cacheMethod,
             'wait' => $waitInMicroSeconds,
         ]));
+    }
+
+    /**
+     * @param string $dataDirectoryBasePath
+     */
+    protected function initDataDirectory(string $dataDirectoryBasePath = null)
+    {
+        $this->dataDirectoryBasePath = rtrim($dataDirectoryBasePath ?? __DIR__.'/../data', '/');
     }
 
     public function getId()
