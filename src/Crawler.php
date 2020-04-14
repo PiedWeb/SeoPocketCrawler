@@ -5,52 +5,16 @@ namespace PiedWeb\SeoPocketCrawler;
 use PiedWeb\UrlHarvester\Harvest;
 use PiedWeb\UrlHarvester\Indexable;
 use PiedWeb\UrlHarvester\Link;
-use Spatie\Robots\RobotsTxt;
 
 class Crawler
 {
     const FOLLOW = 1;
     const NOFOLLOW = 2;
 
-    /**
-     * @var string contain the user agent used during the crawl
-     */
-    protected $userAgent;
-
-    /**
-     * @var string crawl id
-     */
-    protected $id;
-
-    /**
-     * @var RobotsTxt page to ignore during the crawl
-     */
-    protected $ignore;
-
-    /**
-     * @var int depth max where to crawl
-     */
-    protected $limit;
-
-    /**
-     * @var string contain https://domain.tdl from start url
-     */
-    protected $base;
-
-    /**
-     * @var bool
-     */
-    protected $fromCache;
-
-    /**
-     * @var string
-     */
-    protected $dataDirectoryBasePath;
-
     protected $recorder;
+
     protected $robotsTxt;
     protected $request;
-    protected $wait = 0;
 
     protected $currentClick = 0;
 
@@ -58,66 +22,32 @@ class Crawler
 
     protected $urls = [];
 
+    /**
+     * @var CrawlerConfig
+     */
+    protected $config;
+
     public function __construct(
         string $startUrl,
         string $ignore,
         int $limit,
         string $userAgent,
         int $cacheMethod = Recorder::CACHE_ID,
-        int $waitInMicroSeconds = 100000,
-        ?string $dataDirectoryBasePath = null
+        int $wait = 100000, // microSeconds !
+        ?string $dataDirectory = null
     ) {
-        $startUrl = $this->setBaseAndReturnNormalizedStartUrl($startUrl);
-        $this->urls[$startUrl] = null;
-        $this->id = date('ymdHi').'-'.parse_url($this->base, PHP_URL_HOST);
-        $this->ignore = new RobotsTxt($ignore);
-        $this->userAgent = $userAgent;
-        $this->limit = $limit;
-        $this->wait = $waitInMicroSeconds;
+        $this->config = new CrawlerConfig($startUrl, $ignore, $limit, $userAgent, $cacheMethod, $wait, $dataDirectory);
 
-        $this->initDataDirectory($dataDirectoryBasePath);
+        $this->urls[$this->config->getStartUrl()] = null;
 
-        $this->recorder = new Recorder($this->getDataFolder(), $cacheMethod);
+        $this->recorder = new Recorder($this->config->getDataFolder(), $this->config->getCacheMethod());
 
-        file_put_contents($this->getDataFolder().'/config.json', json_encode([
-            'startUrl' => $startUrl,
-            'base' => $this->base,
-            'ignore' => $ignore,
-            'limit' => $limit,
-            'userAgent' => $userAgent,
-            'cacheMethod' => $cacheMethod,
-            'wait' => $waitInMicroSeconds,
-        ]));
+        $this->config->recordConfig();
     }
 
-    /**
-     * @param string $dataDirectoryBasePath
-     */
-    protected function initDataDirectory(?string $dataDirectoryBasePath = null)
+    public function getConfig(): CrawlerConfig
     {
-        $this->dataDirectoryBasePath = rtrim($dataDirectoryBasePath ?? __DIR__.'/../data', '/');
-    }
-
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    protected function setBaseAndReturnNormalizedStartUrl(string $url): string
-    {
-        if (!filter_var($url, FILTER_VALIDATE_URL)) {
-            throw new \Exception('start is not a valid URL `'.$url.'`');
-        }
-
-        $this->base = preg_match('@^(http://|https://)?[^/\?#]+@', $url, $match) ? $match[0] : $url;
-        $url = substr($url, strlen($this->base));
-
-        return ('/' != $url[0] ? '/' : '').$url;
-    }
-
-    public function getDataFolder()
-    {
-        return $this->dataDirectoryBasePath.'/'.$this->id;
+        return $this->config;
     }
 
     public function crawl(bool $debug = false)
@@ -132,25 +62,29 @@ class Crawler
         foreach ($this->urls as $urlToParse => $url) {
             if (null !== $url && (false === $url->can_be_crawled || true === $url->can_be_crawled)) { // déjà crawlé
                 continue;
-            } elseif ($this->currentClick > $this->limit) {
+            } elseif ($this->currentClick > $this->config->getLimit()) {
                 continue;
             }
 
             if ($debug) {
-                echo $this->counter.'/'.count($this->urls).'    '.$this->base.$urlToParse.PHP_EOL;
+                echo $this->counter.'/'.count($this->urls).'    '.$this->config->getBase().$urlToParse.PHP_EOL;
             }
 
             $nothingUpdated = false;
             ++$this->counter;
 
-            $harvest = $this->harvest($urlToParse);
+            if (null === $this->urls[$urlToParse]) {
+                $url = $this->urls[$urlToParse] = new Url($this->config->getBase().$urlToParse, $this->currentClick);
+            }
+
+            $harvest = false === $this->canBeCrawled($url) ? null : $this->harvest($url);
             $this->urls[$urlToParse]->setDiscovered(count($this->urls));
 
             $this->cacheRobotsTxt($harvest);
 
             $this->cacheRequest($harvest);
 
-            usleep($this->wait);
+            usleep($this->config->getWait());
 
             if ($this->counter / 500 == round($this->counter / 500)) {
                 echo $debug ? '    --- auto-save'.PHP_EOL : '';
@@ -163,7 +97,7 @@ class Crawler
         // Record after each Level:
         $this->recorder->record($this->urls);
 
-        $record = $nothingUpdated || $this->currentClick >= $this->limit;
+        $record = $nothingUpdated || $this->currentClick >= $this->config->getLimit();
 
         return $record ? null : $this->crawl($debug);
     }
@@ -195,33 +129,34 @@ class Crawler
         return $this;
     }
 
-    protected function getHarvest(Url $url)
+    protected function getHarvester(Url $url)
     {
         return Harvest::fromUrl(
-            $this->base.$url->uri,
-            $this->userAgent,
+            $this->config->getBase().$url->uri,
+            $this->config->getUserAgent(),
             'en,en-US;q=0.5',
             $this->request
         );
     }
 
-    protected function harvest(string $urlToParse)
+    protected function canBeCrawled(Url $url)
     {
-        $this->urls[$urlToParse] = $this->urls[$urlToParse] ?? new Url($this->base.$urlToParse, $this->currentClick);
-        $url = $this->urls[$urlToParse];
-
-        $url->can_be_crawled = $this->ignore->allows($this->base.$urlToParse, $this->userAgent);
-
-        if (false === $url->can_be_crawled) {
-            return;
+        if (null === $url->can_be_crawled) {
+            $url->can_be_crawled = $this->config->getVirtualRobots()
+            ->allows($this->config->getBase().$url->uri, $this->config->getUserAgent());
         }
 
-        $harvest = $this->getHarvest($url);
+        return $url->can_be_crawled;
+    }
+
+    protected function harvest(Url $url): ?Harvest
+    {
+        $harvest = $this->getHarvester($url);
 
         if (!$harvest instanceof Harvest) {
             $url->indexable = Indexable::NOT_INDEXABLE_NETWORK_ERROR;
 
-            return;
+            return null;
         }
 
         $this->loadRobotsTxt($harvest);
@@ -253,21 +188,27 @@ class Crawler
             $url->load_time = $harvest->getResponse()->getInfo('total_time');
             $url->size = $harvest->getResponse()->getInfo('size_download');
 
+            /*
+             * I remove it from the default crawler, you can extend this one and restablish this code
+             *
             $breadcrumb = $harvest->getBreadCrumb();
             if (is_array($breadcrumb)) {
                 $url->breadcrumb_level = count($breadcrumb);
                 $url->breadcrumb_first = isset($breadcrumb[1]) ? $breadcrumb[1]->getCleanName() : '';
                 $url->breadcrumb_text = $harvest->getBreadCrumb('//');
             }
+            *
+            $url->kws = ','.implode(',', array_keys($harvest->getKws())).','; // Slow ~20%
+            /**/
 
             $url->title = $harvest->getUniqueTag('head title') ?? '';
-            $url->kws = ','.implode(',', array_keys($harvest->getKws())).','; // Slow ~20%
             $url->h1 = $harvest->getUniqueTag('h1') ?? '';
             $url->h1 = $url->title == $url->h1 ? '=' : $url->h1;
         }
 
         if (isset($links)) {
             $this->updateInboundLinksCounter($url, $links, $harvest);
+            $this->recorder->recordLinksIndex($this->config->getBase(), $url, $this->urls, $harvest->getLinks());
         }
 
         return $harvest;
@@ -277,7 +218,7 @@ class Crawler
     {
         $everAdd = [];
         foreach ($links as $link) {
-            $newUri = substr($link->getPageUrl(), strlen($this->base));
+            $newUri = substr($link->getPageUrl(), strlen($this->config->getBase()));
             $this->urls[$newUri] = $this->urls[$newUri] ?? new Url($link->getPageUrl(), ($this->currentClick + 1));
             if (!isset($everAdd[$newUri])) {
                 $everAdd[$newUri] = 1;

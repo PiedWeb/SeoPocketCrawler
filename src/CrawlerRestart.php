@@ -2,46 +2,50 @@
 
 namespace PiedWeb\SeoPocketCrawler;
 
-use PiedWeb\UrlHarvester\Harvest;
 use PiedWeb\Curl\ResponseFromCache;
+use PiedWeb\UrlHarvester\Harvest;
 
 class CrawlerRestart extends CrawlerContinue
 {
-    public function __construct(string $id, bool $fromCache = false, ?string $dataDirectoryBasePath = null)
+    /**
+     * @var bool
+     */
+    protected $fromCache;
+
+    public function __construct(string $id, bool $fromCache = false, ?string $dataDirectory = null)
     {
         $this->fromCache = $fromCache;
 
-        parent::__construct($id, $dataDirectoryBasePath);
+        $this->config = CrawlerConfig::loadFrom($id, $dataDirectory);
+
+        $this->recorder = new Recorder($this->config->getDataFolder(), $this->config->getCacheMethod());
 
         $this->resetLinks();
+
+        $this->urls[$this->config->getStartUrl()] = null;
     }
 
     protected function resetLinks()
     {
-        exec('rm -rf '.$this->getDataFolder().Recorder::LINKS_DIR);
-        mkdir($this->getDataFolder().Recorder::LINKS_DIR);
+        exec('rm -rf '.$this->config->getDataFolder().Recorder::LINKS_DIR);
+        mkdir($this->config->getDataFolder().Recorder::LINKS_DIR);
     }
 
-    protected function loadFromPreviousCrawl(string $startUrl)
+    protected function getHarvester(Url $url)
     {
-        $this->urls[$startUrl] = null;
-    }
-
-    protected function getHarvest(Url $url)
-    {
-        if (true === $this->fromCache) {
-            $filePath = $this->recorder->getCacheFilePath($url);
-            if (null !== $filePath && file_exists($filePath)) {
-                $response = new ResponseFromCache(
-                    $filePath,
-                    $this->base.$url->uri,
-                    json_decode(file_get_contents($filePath.'---info'), true)
-                );
-
-                return new Harvest($response);
-            }
+        if (false === $this->fromCache) {
+            return parent::getHarvester($url);
         }
 
-        return parent::getHarvest($url);
+        $filePath = $this->recorder->getCacheFilePath($url);
+        if (null !== $filePath && file_exists($filePath)) {
+            $response = new ResponseFromCache(
+                $filePath,
+                $this->config->getBase().$url->uri,
+                json_decode(file_get_contents($filePath.'---info'), true)
+            );
+
+            return new Harvest($response);
+        }
     }
 }

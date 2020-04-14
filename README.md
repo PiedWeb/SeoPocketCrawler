@@ -13,7 +13,7 @@
 
 Web Crawler to check few SEO basics.
 
-Use the collected data in your favorite spreadsheet software.
+Use the collected data in your favorite spreadsheet software or retrieve them via your favorite language.
 
 French documentation available :
 https://piedweb.com/seo/crawler
@@ -31,42 +31,33 @@ $ composer create-project piedweb/seo-pocket-crawler
 ### Crawler CLI
 
 ``` bash
-$ bin/crawler --start="https://piedweb.com"
+$ bin/console crawler:go $start
 ```
 
-Other args:
+#### Arguments:
+
 ```
-    --start -s
-        Define where the crawl start.
+  start                            Define where the crawl start. Eg: https://piedweb.com
+                                   You can specify an id from a previous crawl. Other options will not be listen.
+```
 
-    --limit -l
-        Define where a depth limit for the crawler (default 5).
+#### Options:
 
-    --ignore -i
-        Virtual Robots.txt wich will be interpreted for this crawl (could be a
-        string or an URL).
+```
+  -l, --limit=LIMIT                Define where a depth limit [default: 5]
+  -i, --ignore=IGNORE              Virtual Robots.txt to respect (could be a string or an URL).
+  -u, --user-agent=USER-AGENT      Define the user-agent used during the crawl. [default: "SEO Pocket Crawler - PiedWeb.com/seo/crawler"]
+  -w, --wait=WAIT                  In Microseconds, the time to wait between 2 requests. Default 0,1s. [default: 100000]
+  -c, --cache-method=CACHE-METHOD  In Microseconds, the time to wait between two request. Default : 100000 (0,1s). [default: 2]
+  -r, --restart=RESTART            Permit to restart a previous crawl. Values 1 = fresh restart, 2 = restart from cache
+  -h, --help                       Display this help message
+  -q, --quiet                      Do not output any message
+  -V, --version                    Display this application version
+      --ansi                       Force ANSI output
+      --no-ansi                    Disable ANSI output
+  -n, --no-interaction             Do not ask any interactive question
+  -v|vv|vvv, --verbose             Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
 
-    --user-agent -u
-        Define the user-agent used during the crawl
-
-    --verbose -v
-        Display debugging information (0/1, default 1).
-
-    --wait -w
-        In Microseconds, the time to wait between two request. Default : 100000
-        (0,1s).
-
-    --cache-method -c
-        Keep a copy for each html crawled page : 0 (no),2 (with filename
-        corresponding to the ID),1 (with filename corresponding to the Uri).
-
-    --id -id
-        Permit to continue or if parameter --restart is set, restart a previous
-        crawl. Other args will not be listen.
-
-    --restart -r
-        Permit to restart a previous crawl. Values 1 = fresh restart, 2 = restart
-        from cache
 
 
 ```
@@ -74,14 +65,14 @@ Other args:
 ### Extract All External Links in 1s from a previous crawl
 
 ``` bash
-$ bin/external --id '0232032-piedweb.com' [--host]
+$ bin/console crawler:external $id [--host]
 ```
 
 ```
     --id
         id from a previous crawl
 
-    --host -h
+    --host -ho
         flag permitting to get only host
 ```
 

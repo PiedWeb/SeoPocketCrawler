@@ -17,10 +17,11 @@
     ],
     "require": {
         "php" : "~7.1",
-        "piedweb/url-harvester": "^0.0.14",
+        "piedweb/url-harvester": "^0",
         "cheprasov/php-cli-args": "^2.1",
         "league/csv": "^9.1",
-        "piedweb/curl": "^0.0"
+        "piedweb/curl": "^0.0",
+        "symfony/console": "^5.0"
     },
     "require-dev": {
         "phpunit/phpunit" : ">=7.0",

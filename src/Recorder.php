@@ -16,7 +16,7 @@ class Recorder
     protected $folder;
     protected $cacheMethod;
 
-    public function __construct($folder, $cacheMethod = Record::CACHE_ID)
+    public function __construct($folder, $cacheMethod = self::CACHE_ID)
     {
         $this->folder = $folder;
         $this->cacheMethod = $cacheMethod;
@@ -25,6 +25,7 @@ class Recorder
             mkdir($folder);
             mkdir($folder.Recorder::LINKS_DIR);
             mkdir($folder.Recorder::CACHE_DIR);
+            $this->initLinksIndex();
         }
     }
 
@@ -85,17 +86,20 @@ class Recorder
 
     public function record(array $urls)
     {
-        $fp = fopen($this->folder.'/index.csv', 'w');
+        $dataCsv = fopen($this->folder.'/data.csv', 'w');
+        $indexCsv = fopen($this->folder.'/index.csv', 'w');
 
-        if (false !== $fp) {
+        if (false !== $dataCsv) {
             $header = array_keys(get_object_vars(array_values($urls)[0]));
-            fputcsv($fp, $header);
+            fputcsv($dataCsv, $header);
+            fputcsv($indexCsv, ['id', 'uri']);
 
             foreach ($urls as $url) {
-                fputcsv($fp, get_object_vars($url));
+                fputcsv($dataCsv, get_object_vars($url));
+                fputcsv($indexCsv, [$url->id, $url->uri]);
             }
 
-            fclose($fp);
+            fclose($dataCsv);
 
             return true;
         }
@@ -118,5 +122,36 @@ class Recorder
             return $link->getUrl();
         }, $links);
         file_put_contents($this->folder.Recorder::LINKS_DIR.'/From_'.(string) $from->id, implode(PHP_EOL, $links));
+    }
+
+    protected function initLinksIndex()
+    {
+        if (!file_exists($this->folder.Recorder::LINKS_DIR.'/Index.csv')) {
+            file_put_contents($this->folder.Recorder::LINKS_DIR.'/Index.csv', 'From,To'.PHP_EOL);
+        }
+    }
+
+    public static function removeBase(string $base, string $url)
+    {
+        return (0 === strpos($url, $base)) ? $newstring = substr_replace($url, '', 0, strlen($base)) : null;
+    }
+
+    public function recordLinksIndex(string $base, Url $from, $urls, array $links)
+    {
+        $everAdded = [];
+        $content = '';
+
+        foreach ($links as $link) {
+            $content .= $from->getId();
+            if (in_array($link->getUrl(), $everAdded)) { // like Google, we sould not add duplicate link,
+                // so we say the juice is lost -1
+                $content .= ',-1'.PHP_EOL;
+            } else {
+                $everAdded[] = $link->getUrl();
+                $relative = self::removeBase($base, $link->getPageUrl());
+                $content .= ','.(isset($urls[$relative]) ? $urls[$relative]->getId() : 0).PHP_EOL; // 0 = external
+            }
+        }
+        file_put_contents($this->folder.Recorder::LINKS_DIR.'/Index.csv', $content, FILE_APPEND);
     }
 }

@@ -42,6 +42,7 @@ class Url
     public $uri;
     public $updated_at;
     public $click;
+    public $pagerank;
     public $inboundlinks;
     public $inboundlinks_nofollow;
     public $can_be_crawled;
@@ -59,11 +60,11 @@ class Url
     public $title;
     public $kws;
     public $h1;
-    public $breadcrumb_level;
-    public $breadcrumb_first;
-    public $breadcrumb_text;
+    //public $breadcrumb_level;
+    //public $breadcrumb_first;
+    //public $breadcrumb_text;
 
-    public function __construct($url, $click)
+    public function __construct($url, $click = null)
     {
         $this->id = $this->getId();
         $this->uri = substr($url, strlen(Harvest::getDomainAndSchemeFrom($url)));

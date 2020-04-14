@@ -16,7 +16,7 @@ class CrawlerTest extends \PHPUnit\Framework\TestCase
         $crawl = new Crawler('https://piedweb.com/', '', 0, 'PHPUnit');
         $crawl->crawl(true);
 
-        $this->assertTrue(file_exists($crawl->getDataFolder().'/index.csv'));
+        $this->assertTrue(file_exists($crawl->getConfig()->getDataFolder().'/index.csv'));
     }
 
     public function testWithCacheUriAsFilename()
@@ -24,17 +24,17 @@ class CrawlerTest extends \PHPUnit\Framework\TestCase
         $crawl = new Crawler('https://piedweb.com/', '', 0, 'PHPUnit', Recorder::CACHE_URI);
         $crawl->crawl(false);
 
-        $this->assertTrue(file_exists($crawl->getDataFolder().'/index.csv'));
+        $this->assertTrue(file_exists($crawl->getConfig()->getDataFolder().'/index.csv'));
 
-        $restart = new CrawlerRestart($crawl->getId());
+        $restart = new CrawlerRestart($crawl->getConfig()->getId());
         $restart->crawl(true);
 
-        $continue = new CrawlerContinue($crawl->getId());
+        $continue = new CrawlerContinue($crawl->getConfig()->getId());
         $continue->crawl(true);
 
-        $restart = new CrawlerRestart($crawl->getId(), true);
+        $restart = new CrawlerRestart($crawl->getConfig()->getId(), true);
         $restart->crawl(false);
 
-        $this->assertTrue(file_exists($crawl->getDataFolder().'/index.csv'));
+        $this->assertTrue(file_exists($crawl->getConfig()->getDataFolder().'/index.csv'));
     }
 }
