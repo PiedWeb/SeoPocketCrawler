@@ -60,7 +60,7 @@ class CrawlerCommand extends Command
                 'restart',
                 'r',
                 InputOption::VALUE_REQUIRED,
-                 'Permit to restart a previous crawl. Values 1 = fresh restart, 2 = restart from cache'
+                'Permit to restart a previous crawl. Values 1 = fresh restart, 2 = restart from cache'
             )
         ;
     }
