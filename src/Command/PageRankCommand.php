@@ -2,6 +2,7 @@
 
 namespace PiedWeb\SeoPocketCrawler\Command;
 
+use PiedWeb\SeoPocketCrawler\LinksVisualizer;
 use PiedWeb\SeoPocketCrawler\SimplePageRankCalculator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -32,6 +33,8 @@ class PageRankCommand extends Command
         $pr = new SimplePageRankCalculator($input->getArgument('id'));
 
         echo $pr->record().PHP_EOL;
+
+        new LinksVisualizer($input->getArgument('id'));
 
         return 0;
     }
