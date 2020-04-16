@@ -40,8 +40,7 @@ class LinksVisualizer
         $csv->setHeaderOffset(0);
         $records = $csv->getRecords();
         foreach ($records as $r) {
-            if (
-                $r['To'] > 0 // pas de liens externe
+            if ($r['To'] > 0 // pas de liens externe
                 && isset($this->results['nodes'][$r['From']]) && isset($this->results['nodes'][$r['To']])
             ) {
                 $this->results['links'][] = ['target' => $r['From'], 'source' => $r['To']];
@@ -57,7 +56,11 @@ class LinksVisualizer
 
         foreach ($urls as $url) {
             if (1 == $url->mime_type) { //seulement html
-                $this->results['nodes'][$url->id] = ['id' => $url->id, 'pagerank' => $url->pagerank, 'uri' => $url->uri];
+                $this->results['nodes'][$url->id] = [
+                    'id' => $url->id,
+                    'pagerank' => $url->pagerank,
+                    'uri' => $url->uri
+                ];
             }
         }
     }
