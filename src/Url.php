@@ -2,10 +2,9 @@
 
 namespace PiedWeb\SeoPocketCrawler;
 
-use PiedWeb\UrlHarvester\Harvest;
-
 use League\Uri\Http;
 use League\Uri\UriInfo;
+
 /* http://www.convertcsv.com/csv-to-sql.htm
 CREATE TABLE mytable(
    id               INTEGER  NOT NULL PRIMARY KEY
@@ -60,7 +59,7 @@ class Url
     public $load_time;
     public $size;
     public $title;
-    public $kws;
+    //public $kws;
     public $h1;
     //public $breadcrumb_level;
     //public $breadcrumb_first;

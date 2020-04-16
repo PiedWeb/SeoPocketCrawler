@@ -27,7 +27,7 @@ class LinksVisualizer
             $this->config->getDataFolder().'/pagerank.html',
             file_get_contents(dirname(__FILE__).'/Resources/PageRankVisualizer.html')
         );
-        /**
+        /*
         file_put_contents(
             $this->config->getDataFolder().Recorder::LINKS_DIR.'/data.json',
             json_encode($this->results, JSON_PRETTY_PRINT)
@@ -42,9 +42,10 @@ class LinksVisualizer
         foreach ($records as $r) {
             if (
                 $r['To'] > 0 // pas de liens externe
-                && isset($this->results['nodes'][$r['From']]) && isset ($this->results['nodes'][$r['To']])
-            )
-            $this->results['links'][] = ['target' => $r['From'], 'source' => $r['To']];
+                && isset($this->results['nodes'][$r['From']]) && isset($this->results['nodes'][$r['To']])
+            ) {
+                $this->results['links'][] = ['target' => $r['From'], 'source' => $r['To']];
+            }
         }
 
         $this->results['nodes'] = array_values($this->results['nodes']);
@@ -55,8 +56,9 @@ class LinksVisualizer
         $urls = $this->config->getDataFromPreviousCrawl()['urls'];
 
         foreach ($urls as $url) {
-            if ($url->mime_type == 1) //seulement html
-            $this->results['nodes'][$url->id] = ['id' => $url->id, 'pagerank' => $url->pagerank, 'uri' => $url->uri];
+            if (1 == $url->mime_type) { //seulement html
+                $this->results['nodes'][$url->id] = ['id' => $url->id, 'pagerank' => $url->pagerank, 'uri' => $url->uri];
+            }
         }
     }
 }
