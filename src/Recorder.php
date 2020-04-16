@@ -89,7 +89,7 @@ class Recorder
         $dataCsv = fopen($this->folder.'/data.csv', 'w');
         $indexCsv = fopen($this->folder.'/index.csv', 'w');
 
-        if (false !== $dataCsv) {
+        if (false !== $dataCsv && false !== $indexCsv) {
             $header = array_keys(get_object_vars(array_values($urls)[0]));
             fputcsv($dataCsv, $header);
             fputcsv($indexCsv, ['id', 'uri']);
@@ -133,7 +133,7 @@ class Recorder
 
     public static function removeBase(string $base, string $url)
     {
-        return (0 === strpos($url, $base)) ? $newstring = substr_replace($url, '', 0, strlen($base)) : null;
+        return (0 === strpos($url, $base)) ? substr_replace($url, '', 0, strlen($base)) : null;
     }
 
     public function recordLinksIndex(string $base, Url $from, $urls, array $links)

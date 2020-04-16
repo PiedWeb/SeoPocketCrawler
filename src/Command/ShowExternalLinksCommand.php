@@ -36,7 +36,7 @@ class ShowExternalLinksCommand extends Command
 
         $table->setHeaders($input->getOption('host') ? ['Host'] : ['url', 'from']);
 
-        $links = ExtractExternalLinks::scan($input->getArgument('id'));
+        $links = ExtractExternalLinks::scan((string) $input->getArgument('id'));
         arsort($links);
         $ever = [];
         foreach ($links as $link => $from) {

@@ -30,11 +30,11 @@ class PageRankCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $pr = new SimplePageRankCalculator($input->getArgument('id'));
+        $pr = new SimplePageRankCalculator((string) $input->getArgument('id'));
 
         echo $pr->record().PHP_EOL;
 
-        new LinksVisualizer($input->getArgument('id'));
+        new LinksVisualizer((string) $input->getArgument('id'));
 
         return 0;
     }

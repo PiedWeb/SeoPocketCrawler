@@ -110,7 +110,7 @@ class CrawlerCommand extends Command
     {
         if (null === $this->id) {
             return new Crawler(
-                $input->getArgument('start'),
+                (string) $input->getArgument('start'),
                 $this->loadVirtualRobotsTxt($input),
                 intval($input->getOption('limit')),
                 (string) $input->getOption('user-agent'),

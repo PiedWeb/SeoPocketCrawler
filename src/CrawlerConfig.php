@@ -18,7 +18,7 @@ class CrawlerConfig
     protected $id;
 
     /**
-     * @var RobotsTxt page to ignore during the crawl
+     * @var string page to ignore during the crawl
      */
     protected $ignore;
 
@@ -167,6 +167,7 @@ class CrawlerConfig
         $this->dataDirectory;
     }
 
+    /** @var RobotsTxt */
     protected $virtualRobots;
 
     public function getVirtualRobots()
