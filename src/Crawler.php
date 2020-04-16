@@ -164,9 +164,9 @@ class Crawler
         $url->indexable = $harvest->isIndexable(); // slow ~30%
 
         if (Indexable::NOT_INDEXABLE_3XX === $url->indexable) {
-            $redir = $harvest->getRedirection();
-            if (false !== $redir) {
-                $links = Harvest::LINK_INTERNAL === $harvest->getType($redir) ? [new Link($redir)] : [];
+            $redir = $harvest->getRedirectionLink();
+            if (null !== $redir && $redir->isInternalLink()) { // add to $links to permits to update counter & co
+                $links = [$redir];
             }
         } else {
             $this->recorder->cache($harvest, $url);
@@ -177,11 +177,11 @@ class Crawler
             $this->recorder->recordOutboundLink($url, $harvest->getLinks()); // ~10%
             $url->links = count($harvest->getLinks());
             $url->links_duplicate = $harvest->getNbrDuplicateLinks();
-            $url->links_internal = count($harvest->getLinks(Harvest::LINK_INTERNAL));
-            $url->links_self = count($harvest->getLinks(Harvest::LINK_SELF));
-            $url->links_sub = count($harvest->getLinks(Harvest::LINK_SUB));
-            $url->links_external = count($harvest->getLinks(Harvest::LINK_EXTERNAL));
-            $links = $harvest->getLinks(Harvest::LINK_INTERNAL);
+            $url->links_internal = count($harvest->getLinks(Link::LINK_INTERNAL));
+            $url->links_self = count($harvest->getLinks(Link::LINK_SELF));
+            $url->links_sub = count($harvest->getLinks(Link::LINK_SUB));
+            $url->links_external = count($harvest->getLinks(Link::LINK_EXTERNAL));
+            $links = $harvest->getLinks(Link::LINK_INTERNAL);
 
             //$url->ratio_text_code = $harvest->getRatioTxtCode(); // Slow ~30%
             $url->words_count = $harvest->getTextAnalysis()->getWordNumber();

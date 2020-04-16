@@ -4,6 +4,8 @@ namespace PiedWeb\SeoPocketCrawler;
 
 use PiedWeb\UrlHarvester\Harvest;
 
+use League\Uri\Http;
+use League\Uri\UriInfo;
 /* http://www.convertcsv.com/csv-to-sql.htm
 CREATE TABLE mytable(
    id               INTEGER  NOT NULL PRIMARY KEY
@@ -67,7 +69,7 @@ class Url
     public function __construct($url, $click = null)
     {
         $this->id = $this->getId();
-        $this->uri = substr($url, strlen(Harvest::getDomainAndSchemeFrom($url)));
+        $this->uri = substr($url, strlen(UriInfo::getOrigin(Http::createFromString($url)))); //!
         $this->updated_at = date('Ymd');
         $this->inboundlinks = 0;
         $this->click = $click;
