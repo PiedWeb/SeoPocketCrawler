@@ -25,6 +25,7 @@ class ShowExternalLinksCommand extends Command
                 'id',
                 InputArgument::REQUIRED,
                 'id from a previous crawl'
+                .PHP_EOL.'You can use `last` to get show external links from the last crawl.'
             )
             ->addOption('host', 'ho', InputOption::VALUE_NONE, 'get only host')
         ;

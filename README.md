@@ -39,6 +39,7 @@ $ bin/console crawler:go $start
 ```
   start                            Define where the crawl start. Eg: https://piedweb.com
                                    You can specify an id from a previous crawl. Other options will not be listen.
+                                   You can use `last` to continue the last crawl (just stopped)
 ```
 
 #### Options:
@@ -71,11 +72,25 @@ $ bin/console crawler:external $id [--host]
 ```
     --id
         id from a previous crawl
+        You can use  `last` too show external links from the last crawl.
 
     --host -ho
         flag permitting to get only host
 ```
 
+### Calcul Page Rank
+
+Will update the previous `data.csv` generated.
+
+``` bash
+$ bin/console crawler:pagerank $id
+```
+
+```
+    --id
+        id from a previous crawl
+        You can use `last` too calcul page rank from the last crawl.
+```
 
 
 ## Testing

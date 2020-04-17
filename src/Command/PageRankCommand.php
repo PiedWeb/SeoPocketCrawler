@@ -24,6 +24,7 @@ class PageRankCommand extends Command
                 'id',
                 InputArgument::REQUIRED,
                 'id from a previous crawl'
+                .PHP_EOL.'You can use `last` to calcul page rank from the last crawl.'
             )
         ;
     }

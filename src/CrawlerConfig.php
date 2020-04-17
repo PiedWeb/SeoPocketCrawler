@@ -72,8 +72,37 @@ class CrawlerConfig
         $this->dataDirectory = rtrim($dataDirectory ?? __DIR__.'/../data', '/');
     }
 
+    /**
+     * @return string id
+     */
+    public static function getLastCrawl(string $dataDirectory): string
+    {
+        $dir = scandir($dataDirectory);
+        $lastCrawl = null;
+        $lastRunAt = null;
+
+        foreach ($dir as $file) {
+            if ('.' != $file && '..' != $file
+                && is_dir($dataDirectory.'/'.$file)
+                && filemtime($dataDirectory.'/'.$file) > $lastRunAt) {
+                $lastCrawl = $file;
+                $lastRunAt = filemtime($dataDirectory.'/'.$file);
+            }
+        }
+
+        if (null === $lastCrawl) {
+            throw new \Exception('No crawl previously runned');
+        }
+
+        return $lastCrawl;
+    }
+
     public static function loadFrom(string $crawlId, ?string $dataDirectory = null): self
     {
+        if ('last' === $crawlId) {
+            $crawlId = self::getLastCrawl(rtrim(self::getDataFolderFrom('', $dataDirectory), '/'));
+        }
+
         $configFilePath = self::getDataFolderFrom($crawlId, $dataDirectory).'/config.json';
         if (!file_exists($configFilePath)) {
             throw new \Exception('Crawl `'.$crawlId.'` not found.');
@@ -117,7 +146,7 @@ class CrawlerConfig
         $this->startUrl = (!isset($url[0]) || '/' != $url[0] ? '/' : '').$url;
     }
 
-    public static function getDataFolderFrom($id, ?string $path)
+    public static function getDataFolderFrom(string $id, ?string $path)
     {
         return ($path ?? __DIR__.'/../data').'/'.$id;
     }

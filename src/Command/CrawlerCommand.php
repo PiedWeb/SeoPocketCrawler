@@ -27,6 +27,7 @@ class CrawlerCommand extends Command
                 InputArgument::REQUIRED,
                 'Define where the crawl start. Eg: https://piedweb.com'
                 .PHP_EOL.'You can specify an id from a previous crawl. Other options will not be listen.'
+                .PHP_EOL.'You can use `last` to continue the last crawl (just stopped).'
             )
             ->addOption('limit', 'l', InputOption::VALUE_REQUIRED, 'Define where a depth limit', 5)
             ->addOption(

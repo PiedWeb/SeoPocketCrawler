@@ -59,7 +59,7 @@ class LinksVisualizer
                 $this->results['nodes'][$url->id] = [
                     'id' => $url->id,
                     'pagerank' => $url->pagerank,
-                    'uri' => $url->uri
+                    'uri' => $url->uri,
                 ];
             }
         }
