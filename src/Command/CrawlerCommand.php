@@ -135,7 +135,7 @@ class CrawlerCommand extends Command
             return '';
         }
 
-        $ignore = $input->getOption('ignore');
+        $ignore = (string) $input->getOption('ignore');
 
         if (filter_var($ignore, FILTER_VALIDATE_URL)) {
             return \PiedWeb\Curl\Request::get($ignore);
