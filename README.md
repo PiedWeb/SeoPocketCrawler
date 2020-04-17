@@ -80,7 +80,8 @@ $ bin/console crawler:external $id [--host]
 
 ### Calcul Page Rank
 
-Will update the previous `data.csv` generated.
+Will update the previous `data.csv` generated. Then you can explore your website with the PoC `pagerank.html`
+(in a server `npx http-server -c-1 --port 3000`).
 
 ``` bash
 $ bin/console crawler:pagerank $id
