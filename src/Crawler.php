@@ -80,7 +80,7 @@ class Crawler
                 $crawlerUrl = new $this->harvester($url, $this->config);
 
                 if ($crawlerUrl->getHarvester() instanceof Harvest) {
-                    $this->updateInboundLinksAndUrlsToParse($url, $crawlerUrl->getLinks()); //, $crawlerUrl->getHarvester());
+                    $this->updateInboundLinksAndUrlsToParse($url, $crawlerUrl->getLinks());
                     $this->config->getRecorder()->recordLinksIndex(
                         $this->config->getBase(),
                         $url,
