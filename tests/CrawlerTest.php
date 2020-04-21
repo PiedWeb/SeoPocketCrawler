@@ -8,6 +8,7 @@ use PiedWeb\SeoPocketCrawler\Crawler;
 use PiedWeb\SeoPocketCrawler\CrawlerRestart;
 use PiedWeb\SeoPocketCrawler\CrawlerContinue;
 use PiedWeb\SeoPocketCrawler\Recorder;
+use PiedWeb\SeoPocketCrawler\SimplePageRankCalculator;
 
 class CrawlerTest extends \PHPUnit\Framework\TestCase
 {
@@ -17,6 +18,18 @@ class CrawlerTest extends \PHPUnit\Framework\TestCase
         $crawl->crawl(true);
 
         $this->assertTrue(file_exists($crawl->getConfig()->getDataFolder().'/index.csv'));
+
+        $id = $crawl->getConfig()->getId();
+
+        $crawlerRestart = new CrawlerRestart($id);
+        $crawlerRestart->crawl(true);
+        // todo test
+        $crawlerRestart = new CrawlerContinue($id);
+        $crawlerRestart->crawl(true);
+        // todo test
+        $prCalculator = new SimplePageRankCalculator($id);
+        $prCalculator->record();
+        // todo test
     }
 
     public function testWithCacheUriAsFilename()
