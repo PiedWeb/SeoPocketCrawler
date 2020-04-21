@@ -102,7 +102,7 @@ $ composer test
 
 ## Todo
 
-- [ ] Better Links Harvesting and Recording (record context (list, nav, sentence...), nofollow, anchor)
+- [ ] Better Links Harvesting and Recording (record context (list, nav, sentence...))
 - [ ] Transform the PoC (Page Rank Visualizer)
 - [ ] Complex Page Rank Calculator (with 301, canonical, nofollow, etc.)
 

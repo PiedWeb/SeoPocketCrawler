@@ -7,10 +7,10 @@ use PiedWeb\UrlHarvester\Harvest;
 
 class CrawlerUrlFromCache extends CrawlerUrl
 {
-    public function getHarvester()
+    public function getHarvester(): ?Harvest
     {
         if (null !== $this->harvest) {
-            return $this->harvest;
+            return false === $this->harvest ? null : $this->harvest;
         }
 
         $filePath = $this->config->getRecorder()->getCacheFilePath($this->url);
@@ -26,10 +26,14 @@ class CrawlerUrlFromCache extends CrawlerUrl
 
         $this->harvest ?? $this->harvest = parent::getHarvester();
 
-        if (null !== $this->config->getRobotsTxtCached()) {
+        if (!$this->harvest instanceof Harvest) {
+            $this->harvest = false;
+        }
+
+        if (null !== $this->getHarvester() && null !== $this->config->getRobotsTxtCached()) {
             $this->harvest->setRobotsTxt($this->config->getRobotsTxtCached());
         }
 
-        return $this->harvest;
+        return $this->getHarvester();
     }
 }

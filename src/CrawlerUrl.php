@@ -8,7 +8,7 @@ use PiedWeb\UrlHarvester\Link;
 
 class CrawlerUrl
 {
-    /** @var Harvest */
+    /** @var mixed */
     protected $harvest;
     /** @var Url */
     protected $url;
@@ -50,7 +50,7 @@ class CrawlerUrl
     {
         $this->url->setIndexable($this->getHarvester()->indexable()); // slow ~30%
 
-        $this->url->setMimeType($this->getHarvester()->getResponse()->getMimeType());
+        $this->url->setMimeType((string) $this->getHarvester()->getResponse()->getMimeType());
 
         $this->harvestLinks();
 
@@ -66,7 +66,7 @@ class CrawlerUrl
 
     protected function isNetworkError()
     {
-        if (!$this->getHarvester() instanceof Harvest) {
+        if (null === $this->getHarvester()) {
             $this->url->setIndexable(Indexable::NOT_INDEXABLE_NETWORK_ERROR);
 
             return true;
@@ -103,10 +103,10 @@ class CrawlerUrl
         $this->links = $this->getHarvester()->getLinks(Link::LINK_INTERNAL);
     }
 
-    public function getHarvester()
+    public function getHarvester(): ?Harvest
     {
         if (null !== $this->harvest) {
-            return $this->harvest;
+            return false === $this->harvest ? null : $this->harvest;
         }
 
         $this->harvest = Harvest::fromUrl(
@@ -117,14 +117,14 @@ class CrawlerUrl
         );
 
         if (!$this->harvest instanceof Harvest) { // could be an int corresponding to curl error
-            $this->harvest = null;
+            $this->harvest = false;
         }
 
-        if (null !== $this->harvest && null !== $this->config->getRobotsTxtCached()) {
+        if (false !== $this->harvest && null !== $this->config->getRobotsTxtCached()) {
             $this->harvest->setRobotsTxt($this->config->getRobotsTxtCached());
         }
 
-        return $this->harvest;
+        return $this->getHarvester();
     }
 
     public function getLinks()
@@ -132,6 +132,7 @@ class CrawlerUrl
         return $this->links;
     }
 
+    /*
     protected function harvestBreadcrumb()
     {
         $breadcrumb = $this->getHarvester()->getBreadCrumb();
@@ -140,5 +141,5 @@ class CrawlerUrl
             $this->url->setBreadcrumbFirst(isset($breadcrumb[1]) ? $breadcrumb[1]->getCleanName() : '');
             $this->url->setBreadcrumbText($this->getHarvester()->getBreadCrumb('//'));
         }
-    }
+    }/**/
 }
