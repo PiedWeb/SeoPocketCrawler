@@ -84,7 +84,7 @@ class CrawlerCommand extends Command
             '- `'.$crawler->getConfig()->getWait().' ms between two requests',
         ]);
 
-        $crawler->crawl(!$input->getOption('quiet'));
+        $crawler->crawl();
 
         $end = microtime(true);
 
@@ -116,18 +116,20 @@ class CrawlerCommand extends Command
                 intval($input->getOption('limit')),
                 (string) $input->getOption('user-agent'),
                 intval($input->getOption('cache-method')),
-                intval($input->getOption('wait'))
+                intval($input->getOption('wait')),
+                !$input->getOption('quiet')
             );
         }
 
         if ($input->getOption('restart')) {
             return new CrawlerRestart(
                 $this->id,
-                2 == $input->getOption('restart') ? true : false // $fromCache
+                2 == $input->getOption('restart') ? true : false, // $fromCache
+                !$input->getOption('quiet')
             );
         }
 
-        return new CrawlerContinue($this->id);
+        return new CrawlerContinue($this->id, !$input->getOption('quiet'));
     }
 
     public function loadVirtualRobotsTxt(InputInterface $input)

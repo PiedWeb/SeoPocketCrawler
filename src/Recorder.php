@@ -3,6 +3,7 @@
 namespace PiedWeb\SeoPocketCrawler;
 
 use PiedWeb\UrlHarvester\Harvest;
+use PiedWeb\UrlHarvester\Link;
 
 class Recorder
 {
@@ -23,9 +24,15 @@ class Recorder
 
         if (!file_exists($folder)) {
             mkdir($folder);
+        }
+
+        if (!file_exists($folder.Recorder::LINKS_DIR)) {
             mkdir($folder.Recorder::LINKS_DIR);
-            mkdir($folder.Recorder::CACHE_DIR);
             $this->initLinksIndex();
+        }
+
+        if (!file_exists($folder.Recorder::CACHE_DIR)) {
+            mkdir($folder.Recorder::CACHE_DIR);
         }
     }
 
@@ -107,19 +114,24 @@ class Recorder
         return false;
     }
 
-    public function recordInboundLink(Url $from, Url $to, int $type)
+    public function recordInboundLink(Link $link, Url $from, Url $to)
     {
         file_put_contents(
-            $this->folder.Recorder::LINKS_DIR.'/To_'.(string) $to->id.'_'.$type,
-            $from->uri.PHP_EOL,
+            $this->folder.Recorder::LINKS_DIR.'/To_'.(string) $to->id.'_'.((int) $link->mayFollow()),
+            $this->inboundLinkToStr($link).PHP_EOL, // can use ->relativize to get only /uri
             FILE_APPEND
         );
     }
 
+    protected function inboundLinkToStr(Link $link)
+    {
+        return $link->getParentUrl().';'.$link->getAnchor().';'.((int) $link->mayFollow()).';'.$link->getType();
+    }
+
     public function recordOutboundLink(Url $from, array $links)
     {
-        $links = array_map(function ($link) {
-            return $link->getUrl();
+        $links = array_map(function (Link $link) {
+            return $link->getUrl().';'.$link->getAnchor().';'.((int) $link->mayFollow()).';'.$link->getType();
         }, $links);
         file_put_contents($this->folder.Recorder::LINKS_DIR.'/From_'.(string) $from->id, implode(PHP_EOL, $links));
     }

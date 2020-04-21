@@ -3,6 +3,7 @@
 namespace PiedWeb\SeoPocketCrawler;
 
 use League\Csv\Reader;
+use PiedWeb\UrlHarvester\Harvest;
 use Spatie\Robots\RobotsTxt;
 
 class CrawlerConfig
@@ -51,6 +52,12 @@ class CrawlerConfig
      * @var string
      */
     protected $startUrl;
+
+    protected $request;
+    protected $robotsTxt;
+
+    /** @var Recorder */
+    protected $recorder;
 
     public function __construct(
         string $startUrl,
@@ -122,6 +129,7 @@ class CrawlerConfig
 
     public function recordConfig()
     {
+        $this->getRecorder(); // permit to create folder
         file_put_contents($this->getDataFolder().'/config.json', json_encode([
             'startUrl' => $this->startUrl,
             'base' => $this->base,
@@ -284,5 +292,38 @@ class CrawlerConfig
         $index = $this->getIndexFromPreviousCrawl();
 
         return isset($index[$id]) ? ($base ? $this->base : '').$index[$id]->uri : null;
+    }
+
+    public function cacheRequest($harvest)
+    {
+        if ($harvest instanceof Harvest && null !== $harvest->getResponse()->getRequest()) {
+            $this->request = $harvest->getResponse()->getRequest();
+        }
+
+        return $this;
+    }
+
+    public function getRequestCached()
+    {
+        return $this->request;
+    }
+
+    public function cacheRobotsTxt($harvest)
+    {
+        if (null === $this->robotsTxt && $harvest instanceof Harvest) {
+            $this->robotsTxt = $harvest->getRobotsTxt();
+        }
+
+        return $this;
+    }
+
+    public function getRobotsTxtCached()
+    {
+        return $this->robotsTxt;
+    }
+
+    public function getRecorder()
+    {
+        return $this->recorder ?? $this->recorder = new Recorder($this->getDataFolder(), $this->getCacheMethod());
     }
 }

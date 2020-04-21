@@ -104,7 +104,6 @@ $ composer test
 
 - [ ] Better Links Harvesting and Recording (record context (list, nav, sentence...), nofollow, anchor)
 - [ ] Transform the PoC (Page Rank Visualizer)
-- [ ] Check data accuracy (links... and define labels)
 - [ ] Complex Page Rank Calculator (with 301, canonical, nofollow, etc.)
 
 ## Contributing
