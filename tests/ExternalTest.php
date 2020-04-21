@@ -11,7 +11,7 @@ class ExternalTest extends \PHPUnit\Framework\TestCase
 {
     public function testIt()
     {
-        $crawl = new Crawler('https://piedweb.com/', '', 0, 'PHPUnit');
+        $crawl = new Crawler('https://dev.piedweb.com/', '', 0, 'PHPUnit');
         $crawl->crawl(true);
 
         $this->assertTrue(file_exists($crawl->getConfig()->getDataFolder().'/data.csv'));
