@@ -240,8 +240,7 @@ class CrawlerConfig
         $records = $csv->getRecords();
         foreach ($records as $r) {
             $urls[$r['uri']] = new Url($this->base.$r['uri'], 0);
-            if (
-                isset($r['can_be_crawled']) && !empty($r['can_be_crawled'])
+            if (isset($r['can_be_crawled']) && !empty($r['can_be_crawled'])
                 && Indexable::NOT_INDEXABLE_NETWORK_ERROR != $r['indexable'] // we will retry network errror
             ) {
                 foreach ($r as $k => $v) {
