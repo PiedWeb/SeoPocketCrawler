@@ -49,6 +49,7 @@ class Recorder
                     $filePath,
                     $harvest->getResponse()->getHeaders(false).PHP_EOL.PHP_EOL.$harvest->getResponse()->getContent()
                 );
+
                 return file_put_contents($filePath.'---info', json_encode($harvest->getResponse()->getInfo()));
             } else {
                 return file_put_contents($filePath, 'curl_error_code:'.$harvest); // cache curl error code

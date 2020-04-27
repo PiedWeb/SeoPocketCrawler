@@ -4,6 +4,7 @@ namespace PiedWeb\SeoPocketCrawler;
 
 use League\Csv\Reader;
 use PiedWeb\UrlHarvester\Harvest;
+use PiedWeb\UrlHarvester\Indexable;
 use Spatie\Robots\RobotsTxt;
 
 class CrawlerConfig
@@ -239,13 +240,14 @@ class CrawlerConfig
         $records = $csv->getRecords();
         foreach ($records as $r) {
             $urls[$r['uri']] = new Url($this->base.$r['uri'], 0);
-            foreach ($r as $k => $v) {
-                if ('can_be_crawled' == $k && !empty($v)) {
-                    $v = (bool) $v;
+            if (
+                isset($r['can_be_crawled']) && !empty($r['can_be_crawled'])
+                && Indexable::NOT_INDEXABLE_NETWORK_ERROR != $r['indexable'] // we will retry network errror
+            ) {
+                foreach ($r as $k => $v) {
+                    $kFunction = 'set'.self::camelize($k);
+                    $urls[$r['uri']]->$kFunction($v);
                 }
-                $urls[$r['uri']]->$k = $v;
-            }
-            if (!empty($r['can_be_crawled'])) {
                 ++$counter;
             }
         }
@@ -257,6 +259,11 @@ class CrawlerConfig
             'counter' => $counter,
             'currentClick' => $currentClick,
         ];
+    }
+
+    protected static function camelize($input)
+    {
+        return ucfirst(str_replace('_', '', ucwords($input, '_')));
     }
 
     // could be add in an other class..

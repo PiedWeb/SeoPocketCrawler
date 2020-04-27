@@ -68,9 +68,9 @@ class CrawlerUrl
     {
         if (!$this->getHarvester() instanceof Harvest) {
             $this->url->setIndexable(
-                $this->getHarvester() != 42 ? Indexable::NOT_INDEXABLE_NETWORK_ERROR : Indexable::NOT_INDEXABLE_TOO_BIG
+                42 != $this->getHarvester() ? Indexable::NOT_INDEXABLE_NETWORK_ERROR : Indexable::NOT_INDEXABLE_TOO_BIG
             );
-        $this->config->getRecorder()->cache($this->getHarvester(), $this->url);
+            $this->config->getRecorder()->cache($this->getHarvester(), $this->url);
 
             return true;
         }

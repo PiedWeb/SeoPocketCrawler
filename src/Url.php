@@ -143,7 +143,7 @@ class Url
 
     public function setCanBeCrawled($can_be_crawled)
     {
-        $this->can_be_crawled = $can_be_crawled;
+        $this->can_be_crawled = (bool) $can_be_crawled;
     }
 
     public function getIndexable()

@@ -4,11 +4,9 @@ namespace PiedWeb\SeoPocketCrawler;
 
 use PiedWeb\Curl\ResponseFromCache;
 use PiedWeb\UrlHarvester\Harvest;
-use PiedWeb\UrlHarvester\Indexable;
 
 class CrawlerUrlFromCache extends CrawlerUrl
 {
-
     public function getHarvester()
     {
         if (null !== $this->harvest) {
@@ -18,9 +16,9 @@ class CrawlerUrlFromCache extends CrawlerUrl
         $filePath = $this->config->getRecorder()->getCacheFilePath($this->url);
         if (null !== $filePath && file_exists($filePath)) {
             $cachedContent = file_get_contents($filePath);
-            if (strpos($cachedContent, 'curl_error_code:') === 0) {
+            if (0 === strpos($cachedContent, 'curl_error_code:')) {
                 $this->harvest = substr($cachedContent, strlen('curl_error_code:'));
-                if ($this->harvest != 42) {
+                if (42 != $this->harvest) {
                     $this->harvest = parent::getHarvester(); // retry if was not stopped because too big
                 }
             } else {
@@ -31,7 +29,7 @@ class CrawlerUrlFromCache extends CrawlerUrl
                 );
 
                 $this->harvest = new Harvest($response);
-                if (!$this->harvest instanceOf Harvest) {
+                if (!$this->harvest instanceof Harvest) {
                     var_dump($this->harvest);
                     exit;
                 }
