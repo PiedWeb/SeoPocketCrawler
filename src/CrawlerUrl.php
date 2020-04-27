@@ -66,8 +66,11 @@ class CrawlerUrl
 
     protected function isNetworkError()
     {
-        if (null === $this->getHarvester()) {
-            $this->url->setIndexable(Indexable::NOT_INDEXABLE_NETWORK_ERROR);
+        if (!$this->getHarvester() instanceof Harvest) {
+            $this->url->setIndexable(
+                $this->getHarvester() != 42 ? Indexable::NOT_INDEXABLE_NETWORK_ERROR : Indexable::NOT_INDEXABLE_TOO_BIG
+            );
+        $this->config->getRecorder()->cache($this->getHarvester(), $this->url);
 
             return true;
         }
@@ -103,10 +106,13 @@ class CrawlerUrl
         $this->links = $this->getHarvester()->getLinks(Link::LINK_INTERNAL);
     }
 
-    public function getHarvester(): ?Harvest
+    /**
+     * @return int|Harvest int correspond to curl error
+     */
+    public function getHarvester()
     {
         if (null !== $this->harvest) {
-            return false === $this->harvest ? null : $this->harvest;
+            return $this->harvest;
         }
 
         $this->harvest = Harvest::fromUrl(
@@ -116,11 +122,7 @@ class CrawlerUrl
             $this->config->getRequestCached()
         );
 
-        if (!$this->harvest instanceof Harvest) { // could be an int corresponding to curl error
-            $this->harvest = false;
-        }
-
-        if (false !== $this->harvest && null !== $this->config->getRobotsTxtCached()) {
+        if ($this->harvest instanceof Harvest && null !== $this->config->getRobotsTxtCached()) {
             $this->harvest->setRobotsTxt($this->config->getRobotsTxtCached());
         }
 

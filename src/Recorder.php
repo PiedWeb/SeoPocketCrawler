@@ -36,7 +36,7 @@ class Recorder
         }
     }
 
-    public function cache(Harvest $harvest, Url $url)
+    public function cache($harvest, Url $url)
     {
         if (Recorder::CACHE_NONE === $this->cacheMethod || !$this->mustWeCache($harvest)) {
             return;
@@ -44,12 +44,15 @@ class Recorder
 
         $filePath = $this->getCacheFilePath($url);
         if (!file_exists($filePath)) {
-            file_put_contents(
-                $filePath,
-                $harvest->getResponse()->getHeaders(false).PHP_EOL.PHP_EOL.$harvest->getResponse()->getContent()
-            );
-
-            return file_put_contents($filePath.'---info', json_encode($harvest->getResponse()->getInfo()));
+            if ($harvest instanceof Harvest) {
+                file_put_contents(
+                    $filePath,
+                    $harvest->getResponse()->getHeaders(false).PHP_EOL.PHP_EOL.$harvest->getResponse()->getContent()
+                );
+                return file_put_contents($filePath.'---info', json_encode($harvest->getResponse()->getInfo()));
+            } else {
+                return file_put_contents($filePath, 'curl_error_code:'.$harvest); // cache curl error code
+            }
         }
     }
 
@@ -86,9 +89,9 @@ class Recorder
         return $this->folder.Recorder::CACHE_DIR.'/'.(string) $url->id;
     }
 
-    protected function mustWeCache(Harvest $harvest)
+    protected function mustWeCache($harvest)
     {
-        return false !== strpos($harvest->getResponse()->getContentType(), 'text/html');
+        return true; //false !== strpos($harvest->getResponse()->getContentType(), 'text/html');
     }
 
     public function record(array $urls)

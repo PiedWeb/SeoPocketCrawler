@@ -4,33 +4,43 @@ namespace PiedWeb\SeoPocketCrawler;
 
 use PiedWeb\Curl\ResponseFromCache;
 use PiedWeb\UrlHarvester\Harvest;
+use PiedWeb\UrlHarvester\Indexable;
 
 class CrawlerUrlFromCache extends CrawlerUrl
 {
-    public function getHarvester(): ?Harvest
+
+    public function getHarvester()
     {
         if (null !== $this->harvest) {
-            return false === $this->harvest ? null : $this->harvest;
+            return $this->harvest;
         }
 
         $filePath = $this->config->getRecorder()->getCacheFilePath($this->url);
         if (null !== $filePath && file_exists($filePath)) {
-            $response = new ResponseFromCache(
-                $filePath,
-                $this->config->getBase().$this->url->getUri(),
-                json_decode(file_get_contents($filePath.'---info'), true)
-            );
+            $cachedContent = file_get_contents($filePath);
+            if (strpos($cachedContent, 'curl_error_code:') === 0) {
+                $this->harvest = substr($cachedContent, strlen('curl_error_code:'));
+                if ($this->harvest != 42) {
+                    $this->harvest = parent::getHarvester(); // retry if was not stopped because too big
+                }
+            } else {
+                $response = new ResponseFromCache(
+                    $filePath, // todo: push a PR on PiedWeb\Curl to permit to create ResponseFromCacheString
+                    $this->config->getBase().$this->url->getUri(),
+                    json_decode(file_get_contents($filePath.'---info'), true)
+                );
 
-            $this->harvest = new Harvest($response);
+                $this->harvest = new Harvest($response);
+                if (!$this->harvest instanceOf Harvest) {
+                    var_dump($this->harvest);
+                    exit;
+                }
+            }
+        } else {
+            $this->harvest = parent::getHarvester();
         }
 
-        $this->harvest ?? $this->harvest = parent::getHarvester();
-
-        if (!$this->harvest instanceof Harvest) {
-            $this->harvest = false;
-        }
-
-        if (null !== $this->getHarvester() && null !== $this->config->getRobotsTxtCached()) {
+        if ($this->harvest instanceof Harvest && null !== $this->config->getRobotsTxtCached()) {
             $this->harvest->setRobotsTxt($this->config->getRobotsTxtCached());
         }
 
