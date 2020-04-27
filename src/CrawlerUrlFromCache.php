@@ -29,10 +29,6 @@ class CrawlerUrlFromCache extends CrawlerUrl
                 );
 
                 $this->harvest = new Harvest($response);
-                if (!$this->harvest instanceof Harvest) {
-                    var_dump($this->harvest);
-                    exit;
-                }
             }
         } else {
             $this->harvest = parent::getHarvester();
