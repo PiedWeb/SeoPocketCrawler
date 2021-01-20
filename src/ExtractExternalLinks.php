@@ -59,7 +59,7 @@ class ExtractExternalLinks
 
         foreach ($lines as $line) {
             if (0 !== strpos($line, $this->config->getBase())) {
-                if (!isset($this->external[$line])) {
+                if (! isset($this->external[$line])) {
                     $this->external[$line] = [];
                 }
                 $this->external[$line][] = $from;

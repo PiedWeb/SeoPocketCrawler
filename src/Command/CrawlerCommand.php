@@ -99,7 +99,7 @@ class CrawlerCommand extends Command
 
     public function checkArguments(InputInterface $input)
     {
-        if (!filter_var($input->getArgument('start'), FILTER_VALIDATE_URL)) {
+        if (! filter_var($input->getArgument('start'), FILTER_VALIDATE_URL)) {
             $this->id = $input->getArgument('start');
         }
     }
@@ -117,7 +117,7 @@ class CrawlerCommand extends Command
                 (string) $input->getOption('user-agent'),
                 intval($input->getOption('cache-method')),
                 intval($input->getOption('wait')),
-                !$input->getOption('quiet')
+                ! $input->getOption('quiet')
             );
         }
 
@@ -125,11 +125,11 @@ class CrawlerCommand extends Command
             return new CrawlerRestart(
                 $this->id,
                 2 == $input->getOption('restart') ? true : false, // $fromCache
-                !$input->getOption('quiet')
+                ! $input->getOption('quiet')
             );
         }
 
-        return new CrawlerContinue($this->id, !$input->getOption('quiet'));
+        return new CrawlerContinue($this->id, ! $input->getOption('quiet'));
     }
 
     public function loadVirtualRobotsTxt(InputInterface $input)

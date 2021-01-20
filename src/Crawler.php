@@ -134,9 +134,9 @@ class Crawler
         foreach ($links as $link) {
             $newUri = $link->getUrl()->getRelativizedDocumentUrl();
             $this->urls[$newUri] = $this->urls[$newUri] ?? new Url($link->getPageUrl(), ($this->currentClick + 1));
-            if (!isset($everAdd[$newUri])) {
+            if (! isset($everAdd[$newUri])) {
                 $everAdd[$newUri] = 1;
-                if (!$link->mayFollow()) {
+                if (! $link->mayFollow()) {
                     ++$this->urls[$newUri]->inboundlinks_nofollow;
                 } else {
                     ++$this->urls[$newUri]->inboundlinks;

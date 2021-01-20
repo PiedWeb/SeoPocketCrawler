@@ -67,7 +67,8 @@ class SimplePageRankCalculator
 
     protected function calcul()
     {
-        foreach ($this->results as $id => $pageRank) {
+        $ids = array_keys($this->results);
+        foreach ($ids as $id) {
             $sumPR = 0;
             foreach ($this->getLinksTo($id) as $link) {
                 $sumPR = $sumPR + $this->results[$link] / $this->getNbrLinksFrom($link);
@@ -103,7 +104,7 @@ class SimplePageRankCalculator
 
         $records = $csv->getRecords();
         foreach ($records as $r) {
-            if (!isset($this->linksTo[$r['To']])) {
+            if (! isset($this->linksTo[$r['To']])) {
                 $this->linksTo[$r['To']] = [];
             }
             $this->linksTo[$r['To']][] = $r['From'];

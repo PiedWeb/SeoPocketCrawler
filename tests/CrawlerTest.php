@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace PiedWeb\SeoPocketCrawler\Test;
 
 use PiedWeb\SeoPocketCrawler\Crawler;
-use PiedWeb\SeoPocketCrawler\CrawlerRestart;
 use PiedWeb\SeoPocketCrawler\CrawlerContinue;
+use PiedWeb\SeoPocketCrawler\CrawlerRestart;
 use PiedWeb\SeoPocketCrawler\Recorder;
 use PiedWeb\SeoPocketCrawler\SimplePageRankCalculator;
 use Symfony\Component\Console\Application;
@@ -44,7 +44,6 @@ class CrawlerTest extends \PHPUnit\Framework\TestCase
 
     public function testCommand()
     {
-
         $application = new Application();
 
         $application->add(new \PiedWeb\SeoPocketCrawler\Command\CrawlerCommand());

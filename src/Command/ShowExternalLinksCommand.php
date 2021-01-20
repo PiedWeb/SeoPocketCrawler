@@ -43,7 +43,7 @@ class ShowExternalLinksCommand extends Command
         foreach ($links as $link => $from) {
             if ($input->getOption('host')) {
                 $host = parse_url($link, PHP_URL_HOST);
-                if ($host && !isset($ever[$host])) {
+                if ($host && ! isset($ever[$host])) {
                     $ever[$host] = 1;
                     $table->addRow([$host]);
                 }

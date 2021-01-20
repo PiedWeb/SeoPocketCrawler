@@ -22,28 +22,28 @@ class Recorder
         $this->folder = $folder;
         $this->cacheMethod = $cacheMethod;
 
-        if (!file_exists($folder)) {
+        if (! file_exists($folder)) {
             mkdir($folder);
         }
 
-        if (!file_exists($folder.Recorder::LINKS_DIR)) {
+        if (! file_exists($folder.Recorder::LINKS_DIR)) {
             mkdir($folder.Recorder::LINKS_DIR);
             $this->initLinksIndex();
         }
 
-        if (!file_exists($folder.Recorder::CACHE_DIR)) {
+        if (! file_exists($folder.Recorder::CACHE_DIR)) {
             mkdir($folder.Recorder::CACHE_DIR);
         }
     }
 
     public function cache($harvest, Url $url)
     {
-        if (Recorder::CACHE_NONE === $this->cacheMethod || !$this->mustWeCache($harvest)) {
+        if (Recorder::CACHE_NONE === $this->cacheMethod || ! $this->mustWeCache($harvest)) {
             return;
         }
 
         $filePath = $this->getCacheFilePath($url);
-        if (!file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             if ($harvest instanceof Harvest) {
                 file_put_contents(
                     $filePath,
@@ -78,7 +78,7 @@ class Recorder
                 return $folder.'/'.(empty($urlPart[$i]) ? 'index.html' : $urlPart[$i]);
             } else {
                 $folder .= '/'.$urlPart[$i];
-                if (!file_exists($folder) || !is_dir($folder)) {
+                if (! file_exists($folder) || ! is_dir($folder)) {
                     mkdir($folder);
                 }
             }
@@ -142,7 +142,7 @@ class Recorder
 
     protected function initLinksIndex()
     {
-        if (!file_exists($this->folder.Recorder::LINKS_DIR.'/Index.csv')) {
+        if (! file_exists($this->folder.Recorder::LINKS_DIR.'/Index.csv')) {
             file_put_contents($this->folder.Recorder::LINKS_DIR.'/Index.csv', 'From,To'.PHP_EOL);
         }
     }

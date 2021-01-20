@@ -1,0 +1,1 @@
+C:37:"PHPUnit\Runner\DefaultTestResultCache":330:{a:2:{s:7:"defects";a:0:{}s:5:"times";a:4:{s:49:"PiedWeb\SeoPocketCrawler\Test\CrawlerTest::testIt";d:3.179;s:54:"PiedWeb\SeoPocketCrawler\Test\CrawlerTest::testCommand";d:0.582;s:69:"PiedWeb\SeoPocketCrawler\Test\CrawlerTest::testWithCacheUriAsFilename";d:1.263;s:50:"PiedWeb\SeoPocketCrawler\Test\ExternalTest::testIt";d:0.598;}}}

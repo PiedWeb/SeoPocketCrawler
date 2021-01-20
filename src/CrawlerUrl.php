@@ -66,7 +66,7 @@ class CrawlerUrl
 
     protected function isNetworkError()
     {
-        if (!$this->getHarvester() instanceof Harvest) {
+        if (! $this->getHarvester() instanceof Harvest) {
             $this->url->setIndexable(
                 42 != $this->getHarvester() ? Indexable::NOT_INDEXABLE_NETWORK_ERROR : Indexable::NOT_INDEXABLE_TOO_BIG
             );

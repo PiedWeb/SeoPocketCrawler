@@ -112,7 +112,7 @@ class CrawlerConfig
         }
 
         $configFilePath = self::getDataFolderFrom($crawlId, $dataDirectory).'/config.json';
-        if (!file_exists($configFilePath)) {
+        if (! file_exists($configFilePath)) {
             throw new \Exception('Crawl `'.$crawlId.'` not found.');
         }
         $config = json_decode(file_get_contents($configFilePath), true);
@@ -144,7 +144,7 @@ class CrawlerConfig
 
     protected function setBaseAndStartUrl(string $url)
     {
-        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+        if (! filter_var($url, FILTER_VALIDATE_URL)) {
             throw new \Exception('start is not a valid URL `'.$url.'`');
         }
 
@@ -152,7 +152,7 @@ class CrawlerConfig
 
         $url = substr($url, strlen($this->base));
 
-        $this->startUrl = (!isset($url[0]) || '/' != $url[0] ? '/' : '').$url;
+        $this->startUrl = (! isset($url[0]) || '/' != $url[0] ? '/' : '').$url;
     }
 
     public static function getDataFolderFrom(string $id, ?string $path)
@@ -227,7 +227,7 @@ class CrawlerConfig
     public function getDataFromPreviousCrawl()
     {
         $dataFilePath = $this->getDataFolder().'/data.csv';
-        if (!file_exists($dataFilePath)) {
+        if (! file_exists($dataFilePath)) {
             throw new \Exception('Previous crawl\'s data not found (index.csv)');
         }
 
@@ -240,7 +240,7 @@ class CrawlerConfig
         $records = $csv->getRecords();
         foreach ($records as $r) {
             $urls[$r['uri']] = new Url($this->base.$r['uri'], 0);
-            if (isset($r['can_be_crawled']) && !empty($r['can_be_crawled'])
+            if (isset($r['can_be_crawled']) && ! empty($r['can_be_crawled'])
                 && Indexable::NOT_INDEXABLE_NETWORK_ERROR != $r['indexable'] // we will retry network errror
             ) {
                 foreach ($r as $k => $v) {
@@ -277,7 +277,7 @@ class CrawlerConfig
         $this->index = [];
 
         $indexFilePath = $this->getDataFolder().'/index.csv';
-        if (!file_exists($indexFilePath)) {
+        if (! file_exists($indexFilePath)) {
             throw new \Exception('Previous crawl\'s data not found (index.csv)');
         }
 
@@ -330,6 +330,10 @@ class CrawlerConfig
 
     public function getRecorder()
     {
-        return $this->recorder ?? $this->recorder = new Recorder($this->getDataFolder(), $this->getCacheMethod());
+        if ($this->recorder) {
+            return $this->recorder;
+        }
+
+        return $this->recorder = new Recorder($this->getDataFolder(), $this->getCacheMethod());
     }
 }
